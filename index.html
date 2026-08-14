@@ -71,6 +71,7 @@ input[type=search]{flex:1;min-width:140px}
 .ghd:hover{background:#F7F9FB}
 .gname{font-size:15px;font-weight:800;letter-spacing:-.01em;flex:1;min-width:0}
 .gname em{font-style:normal;font-size:11px;font-weight:600;color:var(--ink3);margin-left:8px;letter-spacing:.04em}
+.gname.two em{display:block;margin:3px 0 0}
 .gmini{width:74px;height:5px;background:var(--paper);border-radius:3px;overflow:hidden;flex:none}
 .gmini i{display:block;height:100%;background:var(--done);width:0;transition:width .3s}
 .gstat{font-size:12px;font-weight:700;color:var(--ink2);flex:none;min-width:52px;text-align:right}
@@ -244,6 +245,10 @@ body.viewer .qin{pointer-events:none;border-color:transparent;background:transpa
       <button data-site="평택">평택</button>
       <button data-site="기흥">기흥</button>
     </div>
+    <div class="seg" id="segGroup" title="묶어 보는 기준">
+      <button data-group="maker" aria-pressed="true">제조업체별</button>
+      <button data-group="item">품목별</button>
+    </div>
     <select id="dateSel" title="구매신청일 선택"><option value="all">전체 신청일</option></select>
     <label class="chk-only"><input type="checkbox" id="onlyPend">미입고만</label>
     <input type="search" id="q" placeholder="제조업체 · 품목 검색">
@@ -287,7 +292,7 @@ let STATE = {};
 let ARCH = {};
 let noAuto = {};
 let autoArch = true;
-let filter = {site:'all', date:'all', q:'', pend:false};
+let filter = {site:'all', date:'all', q:'', pend:false, group:'maker'};
 let closed = {}, openEdit = null, saving = false, lastSync = null;
 let isAdmin = false, currentUser = null;
 
@@ -367,6 +372,7 @@ function syncBar(){
 
 /* ---------- 상태 계산 ---------- */
 const qtyOf = r => { const s = STATE[r.id]; return (s && s.qty!=null && s.qty!=='') ? Number(s.qty) : Number(r.qty); };
+const recvOf = r => { const s = STATE[r.id]; return (s && !s.cancel && s.recv!=null && s.recv!=='') ? Number(s.recv) : 0; };
 const edited = r => { const s = STATE[r.id]; return !!(s && s.qty!=null && s.qty!=='' && Number(s.qty)!==Number(r.qty)); };
 function statusOf(r){
   const s = STATE[r.id];
@@ -438,8 +444,12 @@ function fillDates(){
 function render(){
   fillDates(); syncBar();
   const rows = visible();
+  const byItem = filter.group === 'item';
   const groups = {};
-  rows.forEach(r=>{ (groups[r.maker] = groups[r.maker] || []).push(r); });
+  rows.forEach(r=>{
+    const k = byItem ? ((r.code||'').trim() || r.spec) : (r.maker || '미지정');
+    (groups[k] = groups[k] || []).push(r);
+  });
   const names = Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length || a.localeCompare(b,'ko'));
 
   const list = $('#list');
@@ -447,14 +457,32 @@ function render(){
     list.innerHTML = '<div class="empty">조건에 맞는 발주 항목이 없습니다.<br>필터를 바꾸거나 검색어를 지워보세요.</div>';
   }else{
     list.innerHTML = names.map(name=>{
-      const g = groups[name].slice().sort((a,b)=>(statusOf(a)==='cancel')-(statusOf(b)==='cancel'));
+      const g = groups[name].slice().sort(byItem
+        ? (a,b)=>(statusOf(a)==='cancel')-(statusOf(b)==='cancel')
+                 || (a.date<b.date?-1:a.date>b.date?1:0)
+                 || (a.site<b.site?-1:a.site>b.site?1:0)
+        : (a,b)=>(statusOf(a)==='cancel')-(statusOf(b)==='cancel'));
       const live = g.filter(r=>statusOf(r)!=='cancel');
       const done = live.filter(r=>statusOf(r)==='done').length;
       const pct = live.length ? Math.round(done/live.length*100) : 100;
-      return '<section class="group '+(closed[name]?'closed':'')+'" data-g="'+esc(name)+'">'
-        + '<div class="ghd" role="button" tabindex="0" aria-expanded="'+(!closed[name])+'">'
+      const ck = (byItem?'i|':'m|') + name;
+      let label, sub;
+      if(byItem){
+        const unit = live.every(r=>r.unit===g[0].unit) ? (g[0].unit||'') : '';
+        const ord  = live.reduce((s,r)=>s+qtyOf(r), 0);
+        const got  = live.reduce((s,r)=>s+recvOf(r), 0);
+        label = g[0].spec;
+        sub = ((g[0].code||'') ? esc(g[0].code)+' · ' : '') + g.length+'건'
+            + ' · 발주 '+num(ord)+esc(unit) + ' · 입고 '+num(got)+esc(unit)
+            + (ord-got>0 ? ' · 잔량 '+num(ord-got)+esc(unit) : '');
+      }else{
+        label = name;
+        sub = g.length+'건';
+      }
+      return '<section class="group '+(closed[ck]?'closed':'')+'" data-g="'+esc(ck)+'">'
+        + '<div class="ghd" role="button" tabindex="0" aria-expanded="'+(!closed[ck])+'">'
         + '<span class="caret">▼</span>'
-        + '<span class="gname">'+esc(name)+'<em>'+g.length+'건</em></span>'
+        + '<span class="gname'+(byItem?' two':'')+'">'+esc(label)+'<em>'+sub+'</em></span>'
         + '<span class="gmini"><i style="width:'+pct+'%"></i></span>'
         + '<span class="gstat">'+done+'/'+live.length+'</span></div>'
         + '<div class="rows">'+g.map(rowHTML).join('')+'</div></section>';
@@ -466,7 +494,7 @@ function render(){
 function rowHTML(r){
   const st = statusOf(r), s = STATE[r.id] || {}, q = qtyOf(r);
   const cls = st==='done'?'done':st==='part'?'part':st==='cancel'?'cancel':'';
-  let meta = esc(r.code||'') + ' · 신청 ' + esc(r.date);
+  let meta = esc(filter.group==='item' ? (r.maker||'미지정') : (r.code||'')) + ' · 신청 ' + esc(r.date);
   if(st==='cancel' && s.cancel.why) meta += ' · 사유 ' + esc(s.cancel.why);
   else if(edited(r) && s.qmemo) meta += ' · 정정사유 ' + esc(s.qmemo);
 
@@ -584,6 +612,12 @@ function doCancel(id){
 $('#segSite').addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
   filter.site = b.dataset.site;
+  [].forEach.call(e.currentTarget.children, x=>x.setAttribute('aria-pressed', x===b));
+  render();
+});
+$('#segGroup').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  filter.group = b.dataset.group;
   [].forEach.call(e.currentTarget.children, x=>x.setAttribute('aria-pressed', x===b));
   render();
 });
