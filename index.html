@@ -71,7 +71,15 @@ input[type=search]{flex:1;min-width:140px}
 .ghd:hover{background:#F7F9FB}
 .gname{font-size:15px;font-weight:800;letter-spacing:-.01em;flex:1;min-width:0}
 .gname em{font-style:normal;font-size:11px;font-weight:600;color:var(--ink3);margin-left:8px;letter-spacing:.04em}
-.gname.two em{display:block;margin:3px 0 0}
+.isum{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:12px}
+.ititle{font-size:15px;font-weight:800;letter-spacing:-.01em;line-height:1.35}
+.ititle em{display:block;font-style:normal;font-size:11px;font-weight:600;color:var(--ink3);margin-top:3px;letter-spacing:.04em}
+.ifig{display:flex;flex-wrap:wrap;gap:18px;margin-top:11px}
+.ifig span{font-size:12px;color:var(--ink2);font-weight:600}
+.ifig b{font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-right:2px}
+.ifig i{display:block;font-style:normal;font-size:11px;color:var(--ink3);font-weight:600;margin-top:1px}
+.ifig .rest b{color:var(--stamp)}
+.isite{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--ink2);font-weight:600}
 .gmini{width:74px;height:5px;background:var(--paper);border-radius:3px;overflow:hidden;flex:none}
 .gmini i{display:block;height:100%;background:var(--done);width:0;transition:width .3s}
 .gstat{font-size:12px;font-weight:700;color:var(--ink2);flex:none;min-width:52px;text-align:right}
@@ -245,11 +253,8 @@ body.viewer .qin{pointer-events:none;border-color:transparent;background:transpa
       <button data-site="평택">평택</button>
       <button data-site="기흥">기흥</button>
     </div>
-    <div class="seg" id="segGroup" title="묶어 보는 기준">
-      <button data-group="maker" aria-pressed="true">제조업체별</button>
-      <button data-group="item">품목별</button>
-    </div>
     <select id="dateSel" title="구매신청일 선택"><option value="all">전체 신청일</option></select>
+    <select id="itemSel" title="품목 선택"><option value="all">전체 품목</option></select>
     <label class="chk-only"><input type="checkbox" id="onlyPend">미입고만</label>
     <input type="search" id="q" placeholder="제조업체 · 품목 검색">
     <button class="btn pri" id="btnShare">공유</button>
@@ -261,6 +266,7 @@ body.viewer .qin{pointer-events:none;border-color:transparent;background:transpa
   </div>
   <div class="printhead" id="ph"></div>
   <div class="sync" id="sync"></div>
+  <div id="itemSum"></div>
   <div id="list"></div>
   <footer>
     체크박스를 누르면 발주수량 전량이 입고 처리됩니다. 일부만 들어왔으면 입고수량을 직접 고치면 부분입고로 바뀝니다.<br>
@@ -292,11 +298,12 @@ let STATE = {};
 let ARCH = {};
 let noAuto = {};
 let autoArch = true;
-let filter = {site:'all', date:'all', q:'', pend:false, group:'maker'};
+let filter = {site:'all', date:'all', item:'all', q:'', pend:false};
 let closed = {}, openEdit = null, saving = false, lastSync = null;
 let isAdmin = false, currentUser = null;
 
 const bkey = r => r.site+'|'+r.date;
+const ikey = r => (String(r.code||'').trim() || String(r.spec||'').trim());
 const isArch = r => !!ARCH[bkey(r)];
 const activeRows = () => ROWS.filter(r=>!isArch(r));
 
@@ -419,6 +426,7 @@ function visible(){
     const st = statusOf(r);
     if(filter.site!=='all' && r.site!==filter.site) return false;
     if(filter.date!=='all' && r.date!==filter.date) return false;
+    if(filter.item!=='all' && ikey(r)!==filter.item) return false;
     if(filter.pend && (st==='done' || st==='cancel')) return false;
     if(q && !((r.maker+' '+r.spec+' '+(r.code||'')).toLowerCase().includes(q))) return false;
     return true;
@@ -441,15 +449,42 @@ function fillDates(){
   sel.value = filter.date;
 }
 
+/* 품목 목록 — 현재 현장·신청일 조건 안에서, 제조업체 가나다순 → 그 안에서 품목명 가나다순 */
+function fillItems(){
+  const pool = activeRows().filter(r=>
+    (filter.site==='all' || r.site===filter.site) &&
+    (filter.date==='all' || r.date===filter.date));
+  const g = {};
+  pool.forEach(r=>{ (g[ikey(r)] = g[ikey(r)] || []).push(r); });
+  const keys = Object.keys(g);
+
+  const byMaker = {};
+  keys.forEach(k=>{ const m = g[k][0].maker || '미지정'; (byMaker[m] = byMaker[m] || []).push(k); });
+  const makers = Object.keys(byMaker).sort((a,b)=>a.localeCompare(b,'ko'));
+  makers.forEach(m=>byMaker[m].sort((a,b)=>g[a][0].spec.localeCompare(g[b][0].spec,'ko')));
+
+  const sel = $('#itemSel');
+  const sig = makers.map(m=>m+'>'+byMaker[m].map(k=>k+':'+g[k].length).join(',')).join('|')+'#'+pool.length;
+  if(sel._sig !== sig){
+    sel._sig = sig;
+    if(filter.item!=='all' && !g[filter.item]) filter.item = 'all';
+    sel.innerHTML = '<option value="all">전체 품목 · '+keys.length+'종</option>'
+      + makers.map(m=>'<optgroup label="'+esc(m)+' · '+byMaker[m].length+'종">'
+          + byMaker[m].map(k=>{
+              const r = g[k][0];
+              const label = r.spec + (r.code ? ' ('+r.code+')' : '') + ' · ' + g[k].length+'건';
+              return '<option value="'+esc(k)+'">'+esc(label)+'</option>';
+            }).join('')
+          + '</optgroup>').join('');
+  }
+  sel.value = filter.item;
+}
+
 function render(){
-  fillDates(); syncBar();
+  fillDates(); fillItems(); syncBar(); itemSummary();
   const rows = visible();
-  const byItem = filter.group === 'item';
   const groups = {};
-  rows.forEach(r=>{
-    const k = byItem ? ((r.code||'').trim() || r.spec) : (r.maker || '미지정');
-    (groups[k] = groups[k] || []).push(r);
-  });
+  rows.forEach(r=>{ (groups[r.maker] = groups[r.maker] || []).push(r); });
   const names = Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length || a.localeCompare(b,'ko'));
 
   const list = $('#list');
@@ -457,32 +492,15 @@ function render(){
     list.innerHTML = '<div class="empty">조건에 맞는 발주 항목이 없습니다.<br>필터를 바꾸거나 검색어를 지워보세요.</div>';
   }else{
     list.innerHTML = names.map(name=>{
-      const g = groups[name].slice().sort(byItem
-        ? (a,b)=>(statusOf(a)==='cancel')-(statusOf(b)==='cancel')
-                 || (a.date<b.date?-1:a.date>b.date?1:0)
-                 || (a.site<b.site?-1:a.site>b.site?1:0)
-        : (a,b)=>(statusOf(a)==='cancel')-(statusOf(b)==='cancel'));
+      const g = groups[name].slice().sort((a,b)=>(statusOf(a)==='cancel')-(statusOf(b)==='cancel')
+        || (a.date<b.date?-1:a.date>b.date?1:0) || (a.site<b.site?-1:a.site>b.site?1:0));
       const live = g.filter(r=>statusOf(r)!=='cancel');
       const done = live.filter(r=>statusOf(r)==='done').length;
       const pct = live.length ? Math.round(done/live.length*100) : 100;
-      const ck = (byItem?'i|':'m|') + name;
-      let label, sub;
-      if(byItem){
-        const unit = live.every(r=>r.unit===g[0].unit) ? (g[0].unit||'') : '';
-        const ord  = live.reduce((s,r)=>s+qtyOf(r), 0);
-        const got  = live.reduce((s,r)=>s+recvOf(r), 0);
-        label = g[0].spec;
-        sub = ((g[0].code||'') ? esc(g[0].code)+' · ' : '') + g.length+'건'
-            + ' · 발주 '+num(ord)+esc(unit) + ' · 입고 '+num(got)+esc(unit)
-            + (ord-got>0 ? ' · 잔량 '+num(ord-got)+esc(unit) : '');
-      }else{
-        label = name;
-        sub = g.length+'건';
-      }
-      return '<section class="group '+(closed[ck]?'closed':'')+'" data-g="'+esc(ck)+'">'
-        + '<div class="ghd" role="button" tabindex="0" aria-expanded="'+(!closed[ck])+'">'
+      return '<section class="group '+(closed[name]?'closed':'')+'" data-g="'+esc(name)+'">'
+        + '<div class="ghd" role="button" tabindex="0" aria-expanded="'+(!closed[name])+'">'
         + '<span class="caret">▼</span>'
-        + '<span class="gname'+(byItem?' two':'')+'">'+esc(label)+'<em>'+sub+'</em></span>'
+        + '<span class="gname">'+esc(name)+'<em>'+g.length+'건</em></span>'
         + '<span class="gmini"><i style="width:'+pct+'%"></i></span>'
         + '<span class="gstat">'+done+'/'+live.length+'</span></div>'
         + '<div class="rows">'+g.map(rowHTML).join('')+'</div></section>';
@@ -491,10 +509,34 @@ function render(){
   updateCounts();
 }
 
+/* 선택한 품목의 현장·신청일 합계 */
+function itemSummary(){
+  const el = $('#itemSum');
+  if(filter.item==='all'){ el.innerHTML=''; return; }
+  const g = activeRows().filter(r=>ikey(r)===filter.item);
+  if(!g.length){ el.innerHTML=''; return; }
+  const live = g.filter(r=>statusOf(r)!=='cancel');
+  const unit = live.length && live.every(r=>r.unit===live[0].unit) ? (live[0].unit||'') : '';
+  const ord = live.reduce((s,r)=>s+qtyOf(r), 0);
+  const got = live.reduce((s,r)=>s+recvOf(r), 0);
+  const done = live.filter(r=>statusOf(r)==='done').length;
+  const bySite = {};
+  live.forEach(r=>{ const b = bySite[r.site] = bySite[r.site] || {o:0,g:0}; b.o += qtyOf(r); b.g += recvOf(r); });
+  el.innerHTML = '<div class="isum"><div class="ititle">'+esc(g[0].spec)
+    + '<em>'+esc(g[0].code||'')+(g[0].code?' · ':'')+esc(g[0].maker||'')+'</em></div>'
+    + '<div class="ifig"><span><b>'+num(ord)+'</b>'+esc(unit)+'<i>발주</i></span>'
+    + '<span><b>'+num(got)+'</b>'+esc(unit)+'<i>입고</i></span>'
+    + '<span class="rest"><b>'+num(ord-got)+'</b>'+esc(unit)+'<i>잔량</i></span>'
+    + '<span><b>'+done+'/'+live.length+'</b><i>건 완료</i></span></div>'
+    + '<div class="isite">'+Object.keys(bySite).sort().map(s=>
+        esc(s)+' 발주 '+num(bySite[s].o)+esc(unit)+' · 입고 '+num(bySite[s].g)+esc(unit)).join('　|　')
+    + '</div></div>';
+}
+
 function rowHTML(r){
   const st = statusOf(r), s = STATE[r.id] || {}, q = qtyOf(r);
   const cls = st==='done'?'done':st==='part'?'part':st==='cancel'?'cancel':'';
-  let meta = esc(filter.group==='item' ? (r.maker||'미지정') : (r.code||'')) + ' · 신청 ' + esc(r.date);
+  let meta = esc(r.code||'') + ' · 신청 ' + esc(r.date);
   if(st==='cancel' && s.cancel.why) meta += ' · 사유 ' + esc(s.cancel.why);
   else if(edited(r) && s.qmemo) meta += ' · 정정사유 ' + esc(s.qmemo);
 
@@ -615,13 +657,8 @@ $('#segSite').addEventListener('click', e=>{
   [].forEach.call(e.currentTarget.children, x=>x.setAttribute('aria-pressed', x===b));
   render();
 });
-$('#segGroup').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b) return;
-  filter.group = b.dataset.group;
-  [].forEach.call(e.currentTarget.children, x=>x.setAttribute('aria-pressed', x===b));
-  render();
-});
 $('#dateSel').addEventListener('change', e=>{ filter.date = e.target.value; render(); });
+$('#itemSel').addEventListener('change', e=>{ filter.item = e.target.value; render(); });
 $('#onlyPend').addEventListener('change', e=>{ filter.pend = e.target.checked; render(); });
 $('#q').addEventListener('input', e=>{ filter.q = e.target.value; render(); });
 
@@ -659,8 +696,10 @@ function xlsxBlob(){
 }
 function summaryText(){
   const rows = visible();
+  const pick = filter.item==='all' ? null : activeRows().find(r=>ikey(r)===filter.item);
   const scope = (filter.site==='all'?'평택+기흥':filter.site) + ' · '
-              + (filter.date==='all'?'전체 신청일':filter.date+' 신청분');
+              + (filter.date==='all'?'전체 신청일':filter.date+' 신청분')
+              + (pick ? ' · 품목 '+pick.spec+(pick.code?' ('+pick.code+')':'') : '');
   let d=0,p=0,q=0,c=0;
   rows.forEach(r=>{ const s=statusOf(r); if(s==='done')d++; else if(s==='part')q++; else if(s==='cancel')c++; else p++; });
   const L = ['[자재 입고 현황] '+today()+' '+nowHM(), scope,
