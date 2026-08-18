@@ -1,0 +1,1274 @@
+
+<!-- saved from url=(0049)https://cgj1123-dev.github.io/material-checklist/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자재 입고 체크리스트</title>
+<script src="./자재_입고_체크리스트_공유형_files/xlsx.full.min.js.다운로드"></script>
+<script src="./자재_입고_체크리스트_공유형_files/supabase-js@2"></script>
+<style>
+:root{
+  --ink:#14202C; --ink2:#4A5C6E; --ink3:#8494A3;
+  --paper:#E6EAEE; --card:#FFFFFF; --line:#D3DAE1;
+  --pyeongtaek:#0F5EA8; --giheung:#6B2FA0;
+  --done:#0D7A4F; --done-bg:#E8F4EE;
+  --part:#A96208; --part-bg:#FBF1E2;
+  --stamp:#B3261E;
+  --r:10px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"Pretendard","Malgun Gothic","맑은 고딕",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.5; padding-bottom:80px;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:980px;margin:0 auto;padding:0 14px}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;box-shadow:0 2px 14px rgba(20,32,44,.22)}
+.hd{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;padding:14px 0 12px;flex-wrap:wrap}
+h1{margin:0;font-size:17px;font-weight:800;letter-spacing:-.02em}
+h1 small{display:block;font-size:11px;font-weight:500;color:#93A6B8;letter-spacing:.06em;margin-top:3px}
+.counts{display:flex;gap:15px;align-items:flex-end}
+.count{text-align:right;line-height:1}
+.count b{font-size:21px;font-weight:800;letter-spacing:-.03em}
+.count span{display:block;font-size:10px;color:#93A6B8;margin-top:5px;letter-spacing:.06em}
+.count.ok b{color:#5FD3A0}
+.count.mut b{font-size:16px;color:#6E8093}
+.bar{height:5px;background:#243646;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#0D7A4F,#5FD3A0);width:0;transition:width .35s ease}
+
+/* ---------- toolbar ---------- */
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:14px 0 10px}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:none;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+select,input[type=search]{padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;
+  font:inherit;font-size:13px;color:var(--ink2)}
+select{font-weight:600;cursor:pointer}
+input[type=search]{flex:1;min-width:140px}
+.chk-only{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink2);
+  background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.chk-only input{width:16px;height:16px;accent-color:var(--ink);margin:0}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 13px;
+  font:inherit;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer}
+.btn:hover{border-color:var(--ink3)}
+.btn.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.warn{color:#9C2A22;border-color:#E3BEBA}
+:focus-visible{outline:2px solid var(--pyeongtaek);outline-offset:2px}
+
+/* 저장 위치 안내줄 */
+.sync{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink2);
+  background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--done);flex:none}
+.dot.solo{background:var(--ink3)}
+.sync b{font-weight:800}
+.sync .btn{padding:4px 9px;font-size:12px}
+
+/* ---------- group ---------- */
+.group{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.ghd{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;user-select:none}
+.ghd:hover{background:#F7F9FB}
+.gname{font-size:15px;font-weight:800;letter-spacing:-.01em;flex:1;min-width:0}
+.gname em{font-style:normal;font-size:11px;font-weight:600;color:var(--ink3);margin-left:8px;letter-spacing:.04em}
+.isum{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:12px}
+.ititle{font-size:15px;font-weight:800;letter-spacing:-.01em;line-height:1.35}
+.ititle em{display:block;font-style:normal;font-size:11px;font-weight:600;color:var(--ink3);margin-top:3px;letter-spacing:.04em}
+.ifig{display:flex;flex-wrap:wrap;gap:18px;margin-top:11px}
+.ifig span{font-size:12px;color:var(--ink2);font-weight:600}
+.ifig b{font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-right:2px}
+.ifig i{display:block;font-style:normal;font-size:11px;color:var(--ink3);font-weight:600;margin-top:1px}
+.ifig .rest b{color:var(--stamp)}
+.isite{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--ink2);font-weight:600}
+.gmini{width:74px;height:5px;background:var(--paper);border-radius:3px;overflow:hidden;flex:none}
+.gmini i{display:block;height:100%;background:var(--done);width:0;transition:width .3s}
+.gstat{font-size:12px;font-weight:700;color:var(--ink2);flex:none;min-width:52px;text-align:right}
+.caret{flex:none;color:var(--ink3);transition:transform .2s;font-size:11px}
+.group.closed .caret{transform:rotate(-90deg)}
+.group.closed .rows{display:none}
+
+/* ---------- row ---------- */
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:11px 12px 11px 0;border-top:1px solid #EDF0F3;position:relative}
+.notch{width:5px;align-self:stretch;flex:none;margin-right:9px}
+.row[data-site="평택"] .notch{background:var(--pyeongtaek)}
+.row[data-site="기흥"] .notch{background:var(--giheung)}
+.box{width:26px;height:26px;flex:none;border:2px solid var(--ink3);border-radius:7px;background:#fff;
+  cursor:pointer;display:grid;place-items:center;transition:.15s}
+.box:hover{border-color:var(--ink)}
+.box svg{width:15px;height:15px;stroke:#fff;stroke-width:3.2;fill:none;opacity:0;transition:.15s}
+.row.done .box{background:var(--done);border-color:var(--done)}
+.row.part .box{background:var(--part);border-color:var(--part)}
+.row.done .box svg,.row.part .box svg{opacity:1}
+.badge{flex:none;font-size:10px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:5px;color:#fff}
+.row[data-site="평택"] .badge{background:var(--pyeongtaek)}
+.row[data-site="기흥"] .badge{background:var(--giheung)}
+.item{flex:1;min-width:0}
+.spec{font-size:14px;font-weight:600;letter-spacing:-.01em;word-break:break-word}
+.meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.tag{display:inline-block;font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:6px;
+  background:#FBF1E2;color:var(--part)}
+.tag.can{background:#EEF1F4;color:var(--ink3)}
+.qty{flex:none;text-align:right;min-width:76px}
+.qty b{font-size:19px;font-weight:800;letter-spacing:-.03em}
+.qty span{font-size:11px;color:var(--ink3);margin-left:2px}
+.qty del{display:block;font-size:11px;color:var(--ink3);font-weight:600}
+.qin{width:66px;padding:5px 7px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:13px;
+  text-align:right;font-weight:700}
+.recv{flex:none;width:126px;text-align:right}
+.more{flex:none;width:28px;height:28px;border:0;background:none;color:var(--ink3);font-size:17px;
+  cursor:pointer;border-radius:6px;line-height:1}
+.more:hover{background:#EEF2F5;color:var(--ink)}
+.row.done{background:var(--done-bg)}
+.row.part{background:var(--part-bg)}
+.row.done .spec,.row.part .spec{color:var(--ink2)}
+.row.cancel{background:#F4F6F8}
+.row.cancel .spec{text-decoration:line-through;color:var(--ink3)}
+.row.cancel .qty b{text-decoration:line-through;color:var(--ink3);font-weight:700}
+.row.cancel .box{visibility:hidden}
+.row.cancel .badge{background:var(--ink3)}
+.row.cancel .notch{background:var(--ink3)}
+
+/* 행 편집 스트립 */
+.edit{flex-basis:100%;border-top:1px dashed var(--line);background:#FAFCFD;
+  margin:10px -12px -11px 0;padding:11px 14px 12px 26px;
+  display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}
+.edit label{font-size:11px;font-weight:700;color:var(--ink2);display:flex;flex-direction:column;gap:4px}
+.edit input{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:13px;background:#fff}
+.edit .num{width:92px;text-align:right;font-weight:700}
+.edit .why{width:190px}
+.edit .note{font-size:11px;color:var(--ink3);flex-basis:100%;margin-top:2px}
+
+/* signature: 검인 stamp */
+.stamp{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  width:54px;height:54px;border:2.5px solid var(--stamp);border-radius:50%;
+  color:var(--stamp);transform:rotate(-11deg);opacity:.92;
+  animation:press .28s cubic-bezier(.2,1.5,.4,1);flex:none}
+.stamp b{font-size:14px;font-weight:900;letter-spacing:.06em;line-height:1}
+.stamp span{font-size:8px;font-weight:700;margin-top:3px;letter-spacing:.02em}
+.row.part .stamp{border-color:var(--part);color:var(--part)}
+.row.cancel .stamp{border-color:var(--ink3);color:var(--ink3);animation:none}
+@keyframes press{from{transform:rotate(-11deg) scale(2.1);opacity:0}to{transform:rotate(-11deg) scale(1);opacity:.92}}
+.stampwrap{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+
+.empty{text-align:center;padding:52px 20px;color:var(--ink3);font-size:14px}
+footer{padding:18px 0 6px;font-size:11px;color:var(--ink3);line-height:1.7}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;font-weight:600;
+  opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 공유 시트 */
+.scrim{position:fixed;inset:0;background:rgba(20,32,44,.5);z-index:50;display:none}
+.scrim.on{display:block}
+.sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,100%);
+  background:#fff;border-radius:14px 14px 0 0;z-index:51;padding:18px 18px 26px;display:none;
+  max-height:86vh;overflow:auto;box-shadow:0 -8px 30px rgba(20,32,44,.25)}
+.sheet.on{display:block;animation:up .22s ease}
+@keyframes up{from{transform:translateX(-50%) translateY(30px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.sheet h2{margin:0 0 4px;font-size:16px;font-weight:800}
+.sheet p.sub{margin:0 0 14px;font-size:12px;color:var(--ink3)}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:#fff;
+  border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:9px;cursor:pointer;font:inherit}
+.opt:hover{border-color:var(--ink3);background:#FAFCFD}
+.opt .ic{font-size:19px;line-height:1.2;flex:none}
+.opt b{display:block;font-size:14px;font-weight:700;margin-bottom:2px}
+.opt em{font-style:normal;font-size:12px;color:var(--ink3);line-height:1.45}
+.sheet textarea{width:100%;height:210px;border:1px solid var(--line);border-radius:8px;padding:11px;
+  font:inherit;font-size:12px;line-height:1.6;resize:vertical}
+
+@media (max-width:640px){
+  .row{flex-wrap:wrap;padding-right:10px}
+  .item{flex-basis:calc(100% - 150px)}
+  .qty{min-width:62px}
+  .recv{width:calc(100% - 40px);text-align:left;padding-left:52px}
+  .stampwrap{justify-content:flex-start}
+  .edit{padding-left:14px;margin-right:-10px}
+  .edit .why{width:100%}
+  .count b{font-size:18px}
+  .counts{gap:12px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- 인쇄 · PDF ---------- */
+.printhead{display:none}
+@media print{
+  @page{size:A4 portrait;margin:12mm 9mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;animation:none!important;transition:none!important}
+  html,body{background:#fff}
+  body{padding-bottom:0;font-size:11px}
+  header,.tools,.sync,.toast,.scrim,.sheet,footer,.more,.edit,.caret{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .printhead{display:block;margin-bottom:12px;padding-bottom:9px;border-bottom:2px solid var(--ink)}
+  .printhead h2{margin:0 0 5px;font-size:16px;font-weight:800;letter-spacing:-.02em}
+  .printhead .pm{font-size:11px;color:var(--ink2);line-height:1.6}
+  .printhead .pm b{font-weight:800;color:var(--ink)}
+  .group{border-color:#C3CEDA;margin-bottom:9px}
+  .group.closed .rows{display:block}
+  .ghd{background:#EEF2F6;padding:8px 11px;border-bottom:1px solid #C3CEDA;
+    break-after:avoid;page-break-after:avoid;break-inside:avoid}
+  .gname{font-size:13px}
+  .row{padding:7px 10px 7px 0;break-inside:avoid;page-break-inside:avoid}
+  .box{width:17px;height:17px;border-width:1.6px;border-radius:5px}
+  .box svg{width:11px;stroke-width:3.6}
+  .spec{font-size:12px}
+  .meta{font-size:10px}
+  .qty b{font-size:15px}
+  .qin{border:0;padding:0;background:none;font-size:14px;font-weight:800;width:52px;
+    -webkit-appearance:none;appearance:none}
+  .qin::-webkit-outer-spin-button,.qin::-webkit-inner-spin-button{-webkit-appearance:none;display:none}
+  .stamp{width:42px;height:42px;border-width:2px;opacity:1}
+  .stamp b{font-size:11px}
+  .stamp span{font-size:7px}
+  .recv{width:112px}
+}
+
+/* ---------- 공유형 권한 UI ---------- */
+body.viewer .admin-only{display:none!important}
+body.viewer .box{cursor:default;opacity:.72}
+body.viewer .more{display:none!important}
+body.viewer .qin{pointer-events:none;border-color:transparent;background:transparent}
+.role-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;background:#EEF2F5;color:var(--ink2)}
+.role-pill.admin{background:#E8F4EE;color:var(--done)}
+.login-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.login-row input{flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font:inherit}
+</style>
+
+</head><body class="viewer"><header>
+  <div class="wrap hd">
+    <h1>자재 입고 체크리스트<small>구매신청 발주분 · 체크 시 입고 처리</small></h1>
+    <div class="counts">
+      <div class="count"><b id="cPend">33</b><span>미입고</span></div>
+      <div class="count"><b id="cPart">2</b><span>부분입고</span></div>
+      <div class="count ok"><b id="cDone">31</b><span>입고완료</span></div>
+      <div class="count mut"><b id="cCan">0</b><span>취소</span></div>
+    </div>
+  </div>
+  <div class="bar"><i id="bar" style="width: 46.9697%;"></i></div>
+</header>
+
+<div class="wrap">
+  <div class="tools">
+    <div class="seg" id="segSite">
+      <button data-site="all" aria-pressed="true">전체</button>
+      <button data-site="평택">평택</button>
+      <button data-site="기흥">기흥</button>
+    </div>
+    <select id="dateSel" title="구매신청일 선택"><option value="all">전체 신청일 · 66건</option><option value="2026-08-12">2026-08-12 · 14건</option><option value="2026-08-10">2026-08-10 · 16건</option><option value="2026-08-06">2026-08-06 · 7건</option><option value="2026-08-04">2026-08-04 · 16건</option><option value="2026-08-03">2026-08-03 · 3건</option><option value="2026-07-30">2026-07-30 · 10건</option></select>
+    <select id="itemSel" title="품목 선택"><option value="all">전체 품목 · 48종</option><optgroup label="대상시너스 · 6종"><option value="대상시너스16">방진U-BAND E125 (대상시너스16) · 1건</option><option value="대상시너스25">방진U-BAND E50 (대상시너스25) · 1건</option><option value="대상시너스3">분체-S-BRACKET SB401 (대상시너스3) · 1건</option><option value="대상시너스">분체-SYSTEMCHANNEL 40*40*3H*4000L (대상시너스) · 1건</option><option value="대상시너스54">실리콘패드 40*40 (대상시너스54) · 1건</option><option value="대상시너스61">NUT/PLWASHER M10*65L (대상시너스61) · 1건</option></optgroup><optgroup label="대형 F.I.T · 1종"><option value="대형 에프아이티3">Matt Finish 산처리 구조관 PIPE 50.8*2.0T*6M (대형 에프아이티3) · 1건</option></optgroup><optgroup label="디에스아이테크 · 2종"><option value="디에스아이테크2">SUPER BELLOWS NW125*200L (디에스아이테크2) · 2건</option><option value="디에스아이테크3">SUPER BELLOWS NW160*200L (디에스아이테크3) · 1건</option></optgroup><optgroup label="보영테크 · 17종"><option value="보영테크113">고강도 KF NRC SUS CLAMP NW25 (보영테크113) · 1건</option><option value="보영테크114">고강도 KF NRC SUS CLAMP NW40 (보영테크114) · 1건</option><option value="보영테크115">고강도 KF NRC SUS CLAMP NW50 (보영테크115) · 1건</option><option value="보영테크122">BELLOWS SHAFT JIG 260L (보영테크122) · 1건</option><option value="보영테크19">CENTERING-ORING-OUTERING NW125 (보영테크19) · 2건</option><option value="보영테크20">CENTERING-ORING-OUTERING NW160 (보영테크20) · 1건</option><option value="보영테크13">CENTERING-ORING-OUTERING NW25 (보영테크13) · 1건</option><option value="보영테크14">CENTERING-ORING-OUTERING NW40 (보영테크14) · 1건</option><option value="보영테크15">CENTERING-ORING-OUTERING NW50 (보영테크15) · 3건</option><option value="보영테크72">KF END CAP FLANGE(SUS) NW25 (보영테크72) · 2건</option><option value="보영테크51">KF FLANGE NW100 (보영테크51) · 1건</option><option value="보영테크47">KF FLANGE NW40 (보영테크47) · 1건</option><option value="보영테크48">KF FLANGE NW50 (보영테크48) · 1건</option><option value="보영테크67">NEW MF FLANGE NW100 (보영테크67) · 2건</option><option value="보영테크68">NEW MF FLANGE NW125 (보영테크68) · 3건</option><option value="보영테크69">NEW MF FLANGE NW160 (보영테크69) · 1건</option><option value="보영테크150">NEW MF FLANGE NW63 (보영테크150) · 1건</option></optgroup><optgroup label="삼성물산 · 1종"><option value="DB005020-005858">BLIND FLANGE_KF_SUS304_NW25 (DB005020-005858) · 1건</option></optgroup><optgroup label="삼성밴드 · 15종"><option value="삼성밴드252">Matt Finish 산세 45ELBOW 127 (삼성밴드252) · 2건</option><option value="삼성밴드249">Matt Finish 산세 45ELBOW 50.8 (삼성밴드249) · 1건</option><option value="삼성밴드261">Matt Finish 산세 60ELBOW 127 (삼성밴드261) · 1건</option><option value="삼성밴드271">Matt Finish 산세 80ELBOW 152.4 (삼성밴드271) · 1건</option><option value="삼성밴드273">Matt Finish 산세 90ELBOW 38.1 (삼성밴드273) · 2건</option><option value="삼성밴드274">Matt Finish 산세 90ELBOW 50.8 (삼성밴드274) · 2건</option><option value="삼성밴드296">Matt Finish 산세 REDUCER 101.6*38.1 (삼성밴드296) · 1건</option><option value="삼성밴드297">Matt Finish 산세 REDUCER 101.6*50.8 (삼성밴드297) · 2건</option><option value="삼성밴드301">Matt Finish 산세 REDUCER 127*101.6 (삼성밴드301) · 1건</option><option value="삼성밴드303">Matt Finish 산세 REDUCER 152.4*101.6 (삼성밴드303) · 4건</option><option value="삼성밴드287">Matt Finish 산세 REDUCER 50.8*38.1 (삼성밴드287) · 2건</option><option value="삼성밴드288">Matt Finish 산세 REDUCER 63.5*38.1 (삼성밴드288) · 1건</option><option value="삼성밴드323">Matt Finish 산세뽕 TEE 50.8*25.4 (삼성밴드323) · 1건</option><option value="삼성밴드454">Matt Finish 산처리 구조관 PIPE [127*2.0T*6M] (삼성밴드454) · 3건</option><option value="삼성밴드457">Matt Finish 산처리 구조관 PIPE 152.4*2.0T*6M (삼성밴드457) · 1건</option></optgroup><optgroup label="유에스지 · 3종"><option value="유에스지23">MIDDLE FOR LINE PIPE 날개 PVC CAP 40 타공 캡 (유에스지23) · 1건</option><option value="유에스지2">MIDDLE FORE LINE SET (내화충전재) NW125(220) (유에스지2) · 1건</option><option value="유에스지5">MIDDLE FORE LINE SET (내화충전재) NW160(270) (유에스지5) · 1건</option></optgroup><optgroup label="유진이노텍 · 1종"><option value="유진이노텍1">DUAL BELLOWS(TI) NW40*150L (유진이노텍1) · 1건</option></optgroup><optgroup label="지에스티산업 · 1종"><option value="지에스티산업5">KF-BELLOWS NW50*200L (지에스티산업5) · 1건</option></optgroup><optgroup label="플러스알테크 · 1종"><option value="플러스알테크2">AL DOUBLE CLAMP 55MM (플러스알테크2) · 1건</option></optgroup></select>
+    <label class="chk-only"><input type="checkbox" id="onlyPend">미입고만</label>
+    <input type="search" id="q" placeholder="제조업체 · 품목 검색">
+    <button class="btn pri" id="btnShare">공유</button>
+    <button class="btn" id="btnAdmin">관리자 로그인</button>
+    <label class="btn admin-only" style="cursor:pointer">구매신청서 불러오기<input type="file" id="fileReq" accept=".xlsx,.xlsm" multiple="" hidden=""></label>
+    <button class="btn" id="btnArch">보관함 <span id="archN">3</span></button>
+    <label class="btn admin-only" style="cursor:pointer">DB 불러오기<input type="file" id="file" accept=".xlsx,.xlsm" hidden=""></label>
+    <button class="btn warn admin-only" id="btnReset">기록 초기화</button>
+  </div>
+  <div class="printhead" id="ph"></div>
+  <div class="sync" id="sync"><span class="dot solo"></span><b>읽기 전용</b><span>이 링크를 받은 사람은 최신 현황을 조회만 할 수 있습니다.</span><span style="flex:1"></span><span style="color:var(--ink3)">동기화 오전 08:14</span><button class="btn" id="btnPull">새로고침</button></div>
+  <div id="itemSum"></div>
+  <div id="list"><section class="group " data-g="삼성밴드"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">삼성밴드<em>25건</em></span><span class="gmini"><i style="width:56%"></i></span><span class="gstat">14/25</span></div><div class="rows"><div class="row " data-id="평택-5" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 45ELBOW 127</div><div class="meta">삼성밴드252 · 신청 2026-07-30</div></div><div class="qty"><b>60</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row done" data-id="평택-6" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 60ELBOW 127</div><div class="meta">삼성밴드261 · 신청 2026-07-30</div></div><div class="qty"><b>40</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="40" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-7" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 101.6*38.1</div><div class="meta">삼성밴드296 · 신청 2026-07-30</div></div><div class="qty"><b>50</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="50" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-8" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 63.5*38.1</div><div class="meta">삼성밴드288 · 신청 2026-07-30</div></div><div class="qty"><b>5</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="5" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-9" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산처리 구조관 PIPE [127*2.0T*6M]</div><div class="meta">삼성밴드454 · 신청 2026-07-30</div></div><div class="qty"><b>40</b><span>本</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="40" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="평택-12" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 90ELBOW 50.8</div><div class="meta">삼성밴드274 · 신청 2026-08-03</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row done" data-id="평택-13" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 127*101.6</div><div class="meta">삼성밴드301 · 신청 2026-08-03</div></div><div class="qty"><b>100</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="100" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="평택-18" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 45ELBOW 127</div><div class="meta">삼성밴드252 · 신청 2026-08-06</div></div><div class="qty"><b>80</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row done" data-id="평택-19" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 50.8*38.1</div><div class="meta">삼성밴드287 · 신청 2026-08-06</div></div><div class="qty"><b>60</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="60" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="기흥-8" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산세 90ELBOW 38.1</div><div class="meta">삼성밴드273 · 신청 2026-08-10</div></div><div class="qty"><b>200</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row done" data-id="기흥-9" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산세 90ELBOW 50.8</div><div class="meta">삼성밴드274 · 신청 2026-08-10</div></div><div class="qty"><b>200</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="200" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="기흥-10" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 152.4*101.6</div><div class="meta">삼성밴드303 · 신청 2026-08-10</div></div><div class="qty"><b>20</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row done" data-id="기흥-11" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 50.8*38.1</div><div class="meta">삼성밴드287 · 신청 2026-08-10</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="30" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="기흥-12" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산세뽕 TEE 50.8*25.4</div><div class="meta">삼성밴드323 · 신청 2026-08-10</div></div><div class="qty"><b>50</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="50" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="평택-25" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 45ELBOW 50.8</div><div class="meta">삼성밴드249 · 신청 2026-08-10</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row done" data-id="평택-26" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 90ELBOW 38.1</div><div class="meta">삼성밴드273 · 신청 2026-08-10</div></div><div class="qty"><b>200</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="200" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-27" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 152.4*101.6</div><div class="meta">삼성밴드303 · 신청 2026-08-10</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="30" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="기흥-15" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 101.6*50.8</div><div class="meta">삼성밴드297 · 신청 2026-08-12</div></div><div class="qty"><b>20</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="20" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="기흥-16" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 152.4*101.6</div><div class="meta">삼성밴드303 · 신청 2026-08-12</div></div><div class="qty"><b>20</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="기흥-17" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">Matt Finish 산처리 구조관 PIPE [127*2.0T*6M]</div><div class="meta">삼성밴드454 · 신청 2026-08-12</div></div><div class="qty"><b>10</b><span>本</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row done" data-id="평택-33" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 80ELBOW 152.4</div><div class="meta">삼성밴드271 · 신청 2026-08-12</div></div><div class="qty"><b>10</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="10" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-34" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 101.6*50.8</div><div class="meta">삼성밴드297 · 신청 2026-08-12</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="30" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="평택-35" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산세 REDUCER 152.4*101.6</div><div class="meta">삼성밴드303 · 신청 2026-08-12</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-36" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산처리 구조관 PIPE 152.4*2.0T*6M</div><div class="meta">삼성밴드457 · 신청 2026-08-12</div></div><div class="qty"><b>20</b><span>本</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-37" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산처리 구조관 PIPE [127*2.0T*6M]</div><div class="meta">삼성밴드454 · 신청 2026-08-12</div></div><div class="qty"><b>30</b><span>本</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div></div></section><section class="group " data-g="보영테크"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">보영테크<em>24건</em></span><span class="gmini"><i style="width:13%"></i></span><span class="gstat">3/24</span></div><div class="rows"><div class="row done" data-id="평택-3" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">KF FLANGE NW40</div><div class="meta">보영테크47 · 신청 2026-07-30</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="300" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-4" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">KF FLANGE NW50</div><div class="meta">보영테크48 · 신청 2026-07-30</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="300" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-11" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">NEW MF FLANGE NW125</div><div class="meta">보영테크68 · 신청 2026-08-03</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="300" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="평택|2026-08-04|보영테크13" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW25</div><div class="meta">보영테크13 · 신청 2026-08-04</div></div><div class="qty"><b>100</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택|2026-08-04|보영테크14" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW40</div><div class="meta">보영테크14 · 신청 2026-08-04</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row part" data-id="평택|2026-08-04|보영테크15" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW50</div><div class="meta">보영테크15 · 신청 2026-08-04</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>부분</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="100" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row part" data-id="평택|2026-08-04|보영테크19" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW125</div><div class="meta">보영테크19 · 신청 2026-08-04</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>부분</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="200" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="평택|2026-08-04|보영테크20" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW160</div><div class="meta">보영테크20 · 신청 2026-08-04</div></div><div class="qty"><b>200</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택|2026-08-04|보영테크113" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">고강도 KF NRC SUS CLAMP NW25</div><div class="meta">보영테크113 · 신청 2026-08-04</div></div><div class="qty"><b>100</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택|2026-08-04|보영테크114" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">고강도 KF NRC SUS CLAMP NW40</div><div class="meta">보영테크114 · 신청 2026-08-04</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택|2026-08-04|보영테크115" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">고강도 KF NRC SUS CLAMP NW50</div><div class="meta">보영테크115 · 신청 2026-08-04</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택|2026-08-04|보영테크72" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">KF END CAP FLANGE(SUS) NW25</div><div class="meta">보영테크72 · 신청 2026-08-04</div></div><div class="qty"><b>100</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-17" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">NEW MF FLANGE NW125</div><div class="meta">보영테크68 · 신청 2026-08-06</div></div><div class="qty"><b>250</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="기흥-5" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">KF END CAP FLANGE(SUS) NW25</div><div class="meta">보영테크72 · 신청 2026-08-10</div></div><div class="qty"><b>10</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="기흥-6" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">NEW MF FLANGE NW125</div><div class="meta">보영테크68 · 신청 2026-08-10</div></div><div class="qty"><b>150</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="기흥-7" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">NEW MF FLANGE NW160</div><div class="meta">보영테크69 · 신청 2026-08-10</div></div><div class="qty"><b>100</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-21" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">BELLOWS SHAFT JIG 260L</div><div class="meta">보영테크122 · 신청 2026-08-10</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-22" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW125</div><div class="meta">보영테크19 · 신청 2026-08-10</div></div><div class="qty"><b>200</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-23" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW50</div><div class="meta">보영테크15 · 신청 2026-08-10</div></div><div class="qty"><b>400</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-24" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">NEW MF FLANGE NW63</div><div class="meta">보영테크150 · 신청 2026-08-10</div></div><div class="qty"><b>10</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="기흥-13" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">NEW MF FLANGE NW100</div><div class="meta">보영테크67 · 신청 2026-08-12</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-30" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">CENTERING-ORING-OUTERING NW50</div><div class="meta">보영테크15 · 신청 2026-08-12</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-31" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">KF FLANGE NW100<span class="tag">수량정정</span></div><div class="meta">보영테크51 · 신청 2026-08-12</div></div><div class="qty"><del>500</del><b>50</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div><div class="row " data-id="평택-32" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">NEW MF FLANGE NW100</div><div class="meta">보영테크67 · 신청 2026-08-12</div></div><div class="qty"><b>100</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div></div></section><section class="group " data-g="대상시너스"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">대상시너스<em>6건</em></span><span class="gmini"><i style="width:100%"></i></span><span class="gstat">6/6</span></div><div class="rows"><div class="row done" data-id="평택-1" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">분체-S-BRACKET SB401</div><div class="meta">대상시너스3 · 신청 2026-07-30</div></div><div class="qty"><b>120</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="120" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-2" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">분체-SYSTEMCHANNEL 40*40*3H*4000L</div><div class="meta">대상시너스 · 신청 2026-07-30</div></div><div class="qty"><b>50</b><span>本</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="50" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택|2026-08-04|대상시너스61" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">NUT/PLWASHER M10*65L</div><div class="meta">대상시너스61 · 신청 2026-08-04</div></div><div class="qty"><b>5,000</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="5000" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-14" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">방진U-BAND E125</div><div class="meta">대상시너스16 · 신청 2026-08-06</div></div><div class="qty"><b>100</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="100" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-15" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">방진U-BAND E50</div><div class="meta">대상시너스25 · 신청 2026-08-06</div></div><div class="qty"><b>300</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="300" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택-16" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">실리콘패드 40*40</div><div class="meta">대상시너스54 · 신청 2026-08-06</div></div><div class="qty"><b>10</b><span>M</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="10" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div></div></section><section class="group " data-g="디에스아이테크"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">디에스아이테크<em>3건</em></span><span class="gmini"><i style="width:67%"></i></span><span class="gstat">2/3</span></div><div class="rows"><div class="row done" data-id="평택|2026-08-04|디에스아이테크2" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">SUPER BELLOWS NW125*200L</div><div class="meta">디에스아이테크2 · 신청 2026-08-04</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="30" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택|2026-08-04|디에스아이테크3" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">SUPER BELLOWS NW160*200L</div><div class="meta">디에스아이테크3 · 신청 2026-08-04</div></div><div class="qty"><b>10</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="10" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row " data-id="평택-29" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">SUPER BELLOWS NW125*200L</div><div class="meta">디에스아이테크2 · 신청 2026-08-12</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div></div></section><section class="group " data-g="유에스지"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">유에스지<em>3건</em></span><span class="gmini"><i style="width:100%"></i></span><span class="gstat">3/3</span></div><div class="rows"><div class="row done" data-id="평택|2026-08-04|유에스지2" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">MIDDLE FORE LINE SET (내화충전재) NW125(220)</div><div class="meta">유에스지2 · 신청 2026-08-04</div></div><div class="qty"><b>30</b><span>SET</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="30" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택|2026-08-04|유에스지5" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">MIDDLE FORE LINE SET (내화충전재) NW160(270)</div><div class="meta">유에스지5 · 신청 2026-08-04</div></div><div class="qty"><b>10</b><span>SET</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="10" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div><div class="row done" data-id="평택|2026-08-04|유에스지23" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">MIDDLE FOR LINE PIPE 날개 PVC CAP 40 타공 캡</div><div class="meta">유에스지23 · 신청 2026-08-04</div></div><div class="qty"><b>30</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="30" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div></div></section><section class="group " data-g="대형 F.I.T"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">대형 F.I.T<em>1건</em></span><span class="gmini"><i style="width:100%"></i></span><span class="gstat">1/1</span></div><div class="rows"><div class="row done" data-id="평택|2026-08-04|대형 에프아이티3" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">Matt Finish 산처리 구조관 PIPE 50.8*2.0T*6M</div><div class="meta">대형 에프아이티3 · 신청 2026-08-04</div></div><div class="qty"><b>50</b><span>본</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-15</span></span><span><input class="qin" type="number" min="0" value="50" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div></div></section><section class="group " data-g="삼성물산"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">삼성물산<em>1건</em></span><span class="gmini"><i style="width:0%"></i></span><span class="gstat">0/1</span></div><div class="rows"><div class="row " data-id="기흥-14" data-site="기흥"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">기흥</span><div class="item"><div class="spec">BLIND FLANGE_KF_SUS304_NW25</div><div class="meta">DB005020-005858 · 신청 2026-08-12</div></div><div class="qty"><b>10</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div></div></section><section class="group " data-g="유진이노텍"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">유진이노텍<em>1건</em></span><span class="gmini"><i style="width:100%"></i></span><span class="gstat">1/1</span></div><div class="rows"><div class="row done" data-id="평택-10" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">DUAL BELLOWS(TI) NW40*150L</div><div class="meta">유진이노텍1 · 신청 2026-07-30</div></div><div class="qty"><b>40</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="40" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div></div></section><section class="group " data-g="지에스티산업"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">지에스티산업<em>1건</em></span><span class="gmini"><i style="width:0%"></i></span><span class="gstat">0/1</span></div><div class="rows"><div class="row " data-id="평택-28" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="false" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">KF-BELLOWS NW50*200L</div><div class="meta">지에스티산업5 · 신청 2026-08-10</div></div><div class="qty"><b>50</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><span class="meta">미입고</span></div></div></div></section><section class="group " data-g="플러스알테크"><div class="ghd" role="button" tabindex="0" aria-expanded="true"><span class="caret">▼</span><span class="gname">플러스알테크<em>1건</em></span><span class="gmini"><i style="width:100%"></i></span><span class="gstat">1/1</span></div><div class="rows"><div class="row done" data-id="평택-20" data-site="평택"><span class="notch"></span><span class="box" role="checkbox" tabindex="-1" aria-checked="true" aria-label="입고 처리"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"></polyline></svg></span><span class="badge">평택</span><div class="item"><div class="spec">AL DOUBLE CLAMP 55MM</div><div class="meta">플러스알테크2 · 신청 2026-08-06</div></div><div class="qty"><b>3,000</b><span>EA</span><div class="meta">발주수량</div></div><div class="recv"><div class="stampwrap"><span class="stamp"><b>입고</b><span>08-14</span></span><span><input class="qin" type="number" min="0" value="3000" readonly="" aria-label="입고수량"><div class="meta" style="text-align:right">입고수량</div></span></div></div></div></div></section></div>
+  <footer>
+    체크박스를 누르면 발주수량 전량이 입고 처리됩니다. 일부만 들어왔으면 입고수량을 직접 고치면 부분입고로 바뀝니다.<br>
+    오른쪽 <b>···</b> 버튼에서 발주수량을 정정하거나 발주를 취소할 수 있습니다. 취소된 발주는 집계와 진행률에서 빠집니다.<br>
+    한 신청일의 발주가 전량 입고되면 그 신청분은 목록에서 내려가 <b>보관함</b>으로 정리됩니다. 보관함에서 되돌리거나 완전히 지울 수 있습니다.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA_SEED = [{"id":"평택-1","site":"평택","date":"2026-07-30","code":"대상시너스3","spec":"분체-S-BRACKET SB401","unit":"EA","qty":120,"maker":"대상시너스"},{"id":"평택-2","site":"평택","date":"2026-07-30","code":"대상시너스","spec":"분체-SYSTEMCHANNEL 40*40*3H*4000L","unit":"本","qty":50,"maker":"대상시너스"},{"id":"평택-3","site":"평택","date":"2026-07-30","code":"보영테크47","spec":"KF FLANGE NW40","unit":"EA","qty":300,"maker":"보영테크"},{"id":"평택-4","site":"평택","date":"2026-07-30","code":"보영테크48","spec":"KF FLANGE NW50","unit":"EA","qty":300,"maker":"보영테크"},{"id":"평택-5","site":"평택","date":"2026-07-30","code":"삼성밴드252","spec":"Matt Finish 산세 45ELBOW 127","unit":"EA","qty":60,"maker":"삼성밴드"},{"id":"평택-6","site":"평택","date":"2026-07-30","code":"삼성밴드261","spec":"Matt Finish 산세 60ELBOW 127","unit":"EA","qty":40,"maker":"삼성밴드"},{"id":"평택-7","site":"평택","date":"2026-07-30","code":"삼성밴드296","spec":"Matt Finish 산세 REDUCER 101.6*38.1","unit":"EA","qty":50,"maker":"삼성밴드"},{"id":"평택-8","site":"평택","date":"2026-07-30","code":"삼성밴드288","spec":"Matt Finish 산세 REDUCER 63.5*38.1","unit":"EA","qty":5,"maker":"삼성밴드"},{"id":"평택-9","site":"평택","date":"2026-07-30","code":"삼성밴드454","spec":"Matt Finish 산처리 구조관 PIPE [127*2.0T*6M]","unit":"本","qty":40,"maker":"삼성밴드"},{"id":"평택-10","site":"평택","date":"2026-07-30","code":"유진이노텍1","spec":"DUAL BELLOWS(TI) NW40*150L","unit":"EA","qty":40,"maker":"유진이노텍"},{"id":"평택-11","site":"평택","date":"2026-08-03","code":"보영테크68","spec":"NEW MF FLANGE NW125","unit":"EA","qty":300,"maker":"보영테크"},{"id":"평택-12","site":"평택","date":"2026-08-03","code":"삼성밴드274","spec":"Matt Finish 산세 90ELBOW 50.8","unit":"EA","qty":300,"maker":"삼성밴드"},{"id":"평택-13","site":"평택","date":"2026-08-03","code":"삼성밴드301","spec":"Matt Finish 산세 REDUCER 127*101.6","unit":"EA","qty":100,"maker":"삼성밴드"},{"id":"평택-14","site":"평택","date":"2026-08-06","code":"대상시너스16","spec":"방진U-BAND E125","unit":"EA","qty":100,"maker":"대상시너스"},{"id":"평택-15","site":"평택","date":"2026-08-06","code":"대상시너스25","spec":"방진U-BAND E50","unit":"EA","qty":300,"maker":"대상시너스"},{"id":"평택-16","site":"평택","date":"2026-08-06","code":"대상시너스54","spec":"실리콘패드 40*40","unit":"M","qty":10,"maker":"대상시너스"},{"id":"평택-17","site":"평택","date":"2026-08-06","code":"보영테크68","spec":"NEW MF FLANGE NW125","unit":"EA","qty":250,"maker":"보영테크"},{"id":"평택-18","site":"평택","date":"2026-08-06","code":"삼성밴드252","spec":"Matt Finish 산세 45ELBOW 127","unit":"EA","qty":80,"maker":"삼성밴드"},{"id":"평택-19","site":"평택","date":"2026-08-06","code":"삼성밴드287","spec":"Matt Finish 산세 REDUCER 50.8*38.1","unit":"EA","qty":60,"maker":"삼성밴드"},{"id":"평택-20","site":"평택","date":"2026-08-06","code":"플러스알테크2","spec":"AL DOUBLE CLAMP 55MM","unit":"EA","qty":3000,"maker":"플러스알테크"},{"id":"평택-21","site":"평택","date":"2026-08-10","code":"보영테크122","spec":"BELLOWS SHAFT JIG 260L","unit":"EA","qty":300,"maker":"보영테크"},{"id":"평택-22","site":"평택","date":"2026-08-10","code":"보영테크19","spec":"CENTERING-ORING-OUTERING NW125","unit":"EA","qty":200,"maker":"보영테크"},{"id":"평택-23","site":"평택","date":"2026-08-10","code":"보영테크15","spec":"CENTERING-ORING-OUTERING NW50","unit":"EA","qty":400,"maker":"보영테크"},{"id":"평택-24","site":"평택","date":"2026-08-10","code":"보영테크150","spec":"NEW MF FLANGE NW63","unit":"EA","qty":10,"maker":"보영테크"},{"id":"평택-25","site":"평택","date":"2026-08-10","code":"삼성밴드249","spec":"Matt Finish 산세 45ELBOW 50.8","unit":"EA","qty":300,"maker":"삼성밴드"},{"id":"평택-26","site":"평택","date":"2026-08-10","code":"삼성밴드273","spec":"Matt Finish 산세 90ELBOW 38.1","unit":"EA","qty":200,"maker":"삼성밴드"},{"id":"평택-27","site":"평택","date":"2026-08-10","code":"삼성밴드303","spec":"Matt Finish 산세 REDUCER 152.4*101.6","unit":"EA","qty":30,"maker":"삼성밴드"},{"id":"평택-28","site":"평택","date":"2026-08-10","code":"지에스티산업5","spec":"KF-BELLOWS NW50*200L","unit":"EA","qty":50,"maker":"지에스티산업"},{"id":"평택-29","site":"평택","date":"2026-08-12","code":"디에스아이테크2","spec":"SUPER BELLOWS NW125*200L","unit":"EA","qty":30,"maker":"디에스아이테크"},{"id":"평택-30","site":"평택","date":"2026-08-12","code":"보영테크15","spec":"CENTERING-ORING-OUTERING NW50","unit":"EA","qty":300,"maker":"보영테크"},{"id":"평택-31","site":"평택","date":"2026-08-12","code":"보영테크51","spec":"KF FLANGE NW100","unit":"EA","qty":500,"maker":"보영테크"},{"id":"평택-32","site":"평택","date":"2026-08-12","code":"보영테크67","spec":"NEW MF FLANGE NW100","unit":"EA","qty":100,"maker":"보영테크"},{"id":"평택-33","site":"평택","date":"2026-08-12","code":"삼성밴드271","spec":"Matt Finish 산세 80ELBOW 152.4","unit":"EA","qty":10,"maker":"삼성밴드"},{"id":"평택-34","site":"평택","date":"2026-08-12","code":"삼성밴드297","spec":"Matt Finish 산세 REDUCER 101.6*50.8","unit":"EA","qty":30,"maker":"삼성밴드"},{"id":"평택-35","site":"평택","date":"2026-08-12","code":"삼성밴드303","spec":"Matt Finish 산세 REDUCER 152.4*101.6","unit":"EA","qty":30,"maker":"삼성밴드"},{"id":"평택-36","site":"평택","date":"2026-08-12","code":"삼성밴드457","spec":"Matt Finish 산처리 구조관 PIPE 152.4*2.0T*6M","unit":"本","qty":20,"maker":"삼성밴드"},{"id":"평택-37","site":"평택","date":"2026-08-12","code":"삼성밴드454","spec":"Matt Finish 산처리 구조관 PIPE [127*2.0T*6M]","unit":"本","qty":30,"maker":"삼성밴드"},{"id":"기흥-1","site":"기흥","date":"2026-07-30","code":"보영테크47","spec":"KF FLANGE NW40","unit":"EA","qty":300,"maker":"보영테크"},{"id":"기흥-2","site":"기흥","date":"2026-07-30","code":"보영테크48","spec":"KF FLANGE NW50","unit":"EA","qty":300,"maker":"보영테크"},{"id":"기흥-3","site":"기흥","date":"2026-08-03","code":"삼성밴드286","spec":"Matt Finish 산세 REDUCER 50.8*25.4","unit":"EA","qty":50,"maker":"삼성밴드"},{"id":"기흥-4","site":"기흥","date":"2026-08-06","code":"보영테크69","spec":"NEW MF FLANGE NW160","unit":"EA","qty":200,"maker":"보영테크"},{"id":"기흥-5","site":"기흥","date":"2026-08-10","code":"보영테크72","spec":"KF END CAP FLANGE(SUS) NW25","unit":"EA","qty":10,"maker":"보영테크"},{"id":"기흥-6","site":"기흥","date":"2026-08-10","code":"보영테크68","spec":"NEW MF FLANGE NW125","unit":"EA","qty":150,"maker":"보영테크"},{"id":"기흥-7","site":"기흥","date":"2026-08-10","code":"보영테크69","spec":"NEW MF FLANGE NW160","unit":"EA","qty":100,"maker":"보영테크"},{"id":"기흥-8","site":"기흥","date":"2026-08-10","code":"삼성밴드273","spec":"Matt Finish 산세 90ELBOW 38.1","unit":"EA","qty":200,"maker":"삼성밴드"},{"id":"기흥-9","site":"기흥","date":"2026-08-10","code":"삼성밴드274","spec":"Matt Finish 산세 90ELBOW 50.8","unit":"EA","qty":200,"maker":"삼성밴드"},{"id":"기흥-10","site":"기흥","date":"2026-08-10","code":"삼성밴드303","spec":"Matt Finish 산세 REDUCER 152.4*101.6","unit":"EA","qty":20,"maker":"삼성밴드"},{"id":"기흥-11","site":"기흥","date":"2026-08-10","code":"삼성밴드287","spec":"Matt Finish 산세 REDUCER 50.8*38.1","unit":"EA","qty":30,"maker":"삼성밴드"},{"id":"기흥-12","site":"기흥","date":"2026-08-10","code":"삼성밴드323","spec":"Matt Finish 산세뽕 TEE 50.8*25.4","unit":"EA","qty":50,"maker":"삼성밴드"},{"id":"기흥-13","site":"기흥","date":"2026-08-12","code":"보영테크67","spec":"NEW MF FLANGE NW100","unit":"EA","qty":30,"maker":"보영테크"},{"id":"기흥-14","site":"기흥","date":"2026-08-12","code":"DB005020-005858","spec":"BLIND FLANGE_KF_SUS304_NW25","unit":"EA","qty":10,"maker":"삼성물산"},{"id":"기흥-15","site":"기흥","date":"2026-08-12","code":"삼성밴드297","spec":"Matt Finish 산세 REDUCER 101.6*50.8","unit":"EA","qty":20,"maker":"삼성밴드"},{"id":"기흥-16","site":"기흥","date":"2026-08-12","code":"삼성밴드303","spec":"Matt Finish 산세 REDUCER 152.4*101.6","unit":"EA","qty":20,"maker":"삼성밴드"},{"id":"기흥-17","site":"기흥","date":"2026-08-12","code":"삼성밴드454","spec":"Matt Finish 산처리 구조관 PIPE [127*2.0T*6M]","unit":"本","qty":10,"maker":"삼성밴드"}];
+const KEY = 'ipgo-checklist-v2';
+
+/* ---------- Supabase 설정 ----------
+   아래 3개 값을 배포 전에 입력하세요.
+   SQL 설정 파일의 관리자 이메일과 반드시 같아야 합니다.
+*/
+const SUPABASE_URL = 'https://dvjqvwvrlfftettlcmds.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_k2xZF1V8D-Bb5u7YXp7Htw_Ybnlc3Tk';
+const ADMIN_EMAIL = 'cgj1123@naver.com';
+const CLOUD_READY = !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_ANON_KEY.startsWith('YOUR_');
+const sb = CLOUD_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+let ROWS = DATA_SEED.slice();
+let STATE = {};
+let ARCH = {};
+let noAuto = {};
+let autoArch = true;
+let filter = {site:'all', date:'all', item:'all', q:'', pend:false};
+let closed = {}, openEdit = null, saving = false, lastSync = null;
+let isAdmin = false, currentUser = null;
+
+const bkey = r => r.site+'|'+r.date;
+const ikey = r => (String(r.code||'').trim() || String(r.spec||'').trim());
+const isArch = r => !!ARCH[bkey(r)];
+const activeRows = () => ROWS.filter(r=>!isArch(r));
+
+const $ = s => document.querySelector(s);
+const today = () => new Date().toLocaleDateString('sv-SE');
+const nowHM = () => new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num = n => Number(n||0).toLocaleString();
+
+function setRoleUI(){
+  document.body.classList.toggle('viewer', !isAdmin);
+  const b=$('#btnAdmin');
+  if(b) b.textContent = isAdmin ? '관리자 로그아웃' : '관리자 로그인';
+  syncBar();
+}
+
+async function loadRaw(){
+  if(!CLOUD_READY) return null;
+  try{
+    const {data,error} = await sb.from('material_checklist_state').select('payload,updated_at').eq('id',1).single();
+    if(error) throw error;
+    if(data){ lastSync = nowHM(); return data.payload ? JSON.stringify(data.payload) : null; }
+  }catch(e){ console.error(e); }
+  return null;
+}
+
+async function save(){
+  if(!isAdmin){ toast('읽기 전용입니다'); return; }
+  if(!CLOUD_READY){ toast('Supabase 설정이 필요합니다'); return; }
+  const payload = {state:STATE, rows:ROWS, arch:ARCH, noauto:noAuto, auto:autoArch, at:Date.now()};
+  saving=true; syncBar();
+  try{
+    const {error}=await sb.from('material_checklist_state').update({payload, updated_at:new Date().toISOString()}).eq('id',1);
+    if(error) throw error;
+    lastSync=nowHM();
+  }catch(e){ console.error(e); toast('서버 저장에 실패했습니다'); }
+  saving=false; syncBar();
+}
+
+async function pull(quiet){
+  const raw=await loadRaw();
+  if(raw){ try{
+    const o=JSON.parse(raw);
+    STATE=o.state||{}; ARCH=o.arch||{}; noAuto=o.noauto||{};
+    if(typeof o.auto==='boolean') autoArch=o.auto;
+    if(o.rows && o.rows.length) ROWS=o.rows;
+  }catch(e){} }
+  render(); setRoleUI();
+  if(!quiet) toast('최신 현황을 불러왔습니다');
+}
+
+async function refreshAuth(){
+  if(!CLOUD_READY){ isAdmin=false; currentUser=null; setRoleUI(); return; }
+  const {data}=await sb.auth.getUser();
+  currentUser=data && data.user ? data.user : null;
+  isAdmin=!!(currentUser && currentUser.email && currentUser.email.toLowerCase()===ADMIN_EMAIL.toLowerCase());
+  setRoleUI();
+}
+
+function syncBar(){
+  const el=$('#sync'); if(!el) return;
+  if(!CLOUD_READY){
+    el.innerHTML='<span class="dot solo"></span><b>배포 설정 필요</b><span>Supabase URL · 키 · 관리자 이메일을 입력하면 공유형으로 작동합니다.</span>';
+    return;
+  }
+  el.innerHTML='<span class="dot '+(isAdmin?'':'solo')+'"></span>'
+    +'<b>'+(isAdmin?'관리자 수정 모드':'읽기 전용')+'</b>'
+    +'<span>'+(isAdmin?'본인만 입고 체크·수량 정정·취소·파일 반영을 할 수 있습니다.':'이 링크를 받은 사람은 최신 현황을 조회만 할 수 있습니다.')+'</span>'
+    +'<span style="flex:1"></span>'
+    +'<span style="color:var(--ink3)">'+(saving?'저장 중…':(lastSync?'동기화 '+lastSync:''))+'</span>'
+    +'<button class="btn" id="btnPull">새로고침</button>';
+}
+
+/* ---------- 상태 계산 ---------- */
+const qtyOf = r => { const s = STATE[r.id]; return (s && s.qty!=null && s.qty!=='') ? Number(s.qty) : Number(r.qty); };
+const recvOf = r => { const s = STATE[r.id]; return (s && !s.cancel && s.recv!=null && s.recv!=='') ? Number(s.recv) : 0; };
+const edited = r => { const s = STATE[r.id]; return !!(s && s.qty!=null && s.qty!=='' && Number(s.qty)!==Number(r.qty)); };
+function statusOf(r){
+  const s = STATE[r.id];
+  if(s && s.cancel) return 'cancel';
+  if(!s || s.recv==null || s.recv==='') return 'pend';
+  return Number(s.recv) >= qtyOf(r) ? 'done' : 'part';
+}
+function patch(id, obj){
+  if(!isAdmin){ toast('읽기 전용입니다'); return; }
+  STATE[id] = Object.assign({}, STATE[id], obj);
+  const s = STATE[id];
+  if(!s.cancel && (s.recv==null||s.recv==='') && (s.qty==null||s.qty==='')) delete STATE[id];
+  sweep();
+  save(); render();
+}
+
+/* 한 신청일(=구매신청서 한 장)의 발주가 전량 입고되면 보관함으로 정리 */
+function sweep(){
+  if(!autoArch) return;
+  const batches = {};
+  ROWS.forEach(r=>{ if(!isArch(r)) (batches[bkey(r)] = batches[bkey(r)]||[]).push(r); });
+  Object.keys(batches).forEach(k=>{
+    if(noAuto[k]) return;
+    const g = batches[k];
+    const live = g.filter(r=>statusOf(r)!=='cancel');
+    const allDone = live.length ? live.every(r=>statusOf(r)==='done') : true;
+    if(allDone){
+      ARCH[k] = {at: today(), n: g.length};
+      const p = k.split('|');
+      toast(p[1]+' '+p[0]+' 신청분 '+g.length+'건 전량 입고 완료 · 보관함으로 정리했습니다');
+    }
+  });
+}
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), 2200);
+}
+
+function visible(){
+  const q = filter.q.trim().toLowerCase();
+  return ROWS.filter(r=>{
+    if(isArch(r)) return false;
+    const st = statusOf(r);
+    if(filter.site!=='all' && r.site!==filter.site) return false;
+    if(filter.date!=='all' && r.date!==filter.date) return false;
+    if(filter.item!=='all' && ikey(r)!==filter.item) return false;
+    if(filter.pend && (st==='done' || st==='cancel')) return false;
+    if(q && !((r.maker+' '+r.spec+' '+(r.code||'')).toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+
+/* ---------- 렌더 ---------- */
+function fillDates(){
+  const act = activeRows();
+  const cnt = {};
+  act.forEach(r=>{ cnt[r.date] = (cnt[r.date]||0)+1; });
+  const dates = Object.keys(cnt).sort().reverse();
+  const sig = dates.join('|')+'#'+act.length;
+  const sel = $('#dateSel');
+  if(sel._sig === sig) return;
+  sel._sig = sig;
+  if(!cnt[filter.date]) filter.date = 'all';
+  sel.innerHTML = '<option value="all">전체 신청일 · '+act.length+'건</option>'
+    + dates.map(d=>'<option value="'+d+'">'+d+' · '+cnt[d]+'건</option>').join('');
+  sel.value = filter.date;
+}
+
+/* 품목 목록 — 현재 현장·신청일 조건 안에서, 제조업체 가나다순 → 그 안에서 품목명 가나다순 */
+function fillItems(){
+  const pool = activeRows().filter(r=>
+    (filter.site==='all' || r.site===filter.site) &&
+    (filter.date==='all' || r.date===filter.date));
+  const g = {};
+  pool.forEach(r=>{ (g[ikey(r)] = g[ikey(r)] || []).push(r); });
+  const keys = Object.keys(g);
+
+  const byMaker = {};
+  keys.forEach(k=>{ const m = g[k][0].maker || '미지정'; (byMaker[m] = byMaker[m] || []).push(k); });
+  const PIN = ['보영테크','삼성밴드'];
+  const makers = Object.keys(byMaker).sort((a,b)=>{
+    const pa = PIN.indexOf(a), pb = PIN.indexOf(b);
+    if(pa!==-1 || pb!==-1) return (pa===-1?99:pa) - (pb===-1?99:pb);
+    return a.localeCompare(b,'ko');
+  });
+  makers.forEach(m=>byMaker[m].sort((a,b)=>g[a][0].spec.localeCompare(g[b][0].spec,'ko')));
+
+  const sel = $('#itemSel');
+  const sig = makers.map(m=>m+'>'+byMaker[m].map(k=>k+':'+g[k].length).join(',')).join('|')+'#'+pool.length;
+  if(sel._sig !== sig){
+    sel._sig = sig;
+    if(filter.item!=='all' && !g[filter.item]) filter.item = 'all';
+    sel.innerHTML = '<option value="all">전체 품목 · '+keys.length+'종</option>'
+      + makers.map(m=>'<optgroup label="'+esc(m)+' · '+byMaker[m].length+'종">'
+          + byMaker[m].map(k=>{
+              const r = g[k][0];
+              return '<option value="'+esc(k)+'">'+esc(r.spec)+'</option>';
+            }).join('')
+          + '</optgroup>').join('');
+  }
+  sel.value = filter.item;
+}
+
+function render(){
+  fillDates(); fillItems(); syncBar(); itemSummary();
+  const rows = visible();
+  const groups = {};
+  rows.forEach(r=>{ (groups[r.maker] = groups[r.maker] || []).push(r); });
+  const names = Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length || a.localeCompare(b,'ko'));
+
+  const list = $('#list');
+  if(!rows.length){
+    list.innerHTML = '<div class="empty">조건에 맞는 발주 항목이 없습니다.<br>필터를 바꾸거나 검색어를 지워보세요.</div>';
+  }else{
+    list.innerHTML = names.map(name=>{
+      const g = groups[name].slice().sort((a,b)=>(statusOf(a)==='cancel')-(statusOf(b)==='cancel')
+        || (a.date<b.date?-1:a.date>b.date?1:0) || (a.site<b.site?-1:a.site>b.site?1:0));
+      const live = g.filter(r=>statusOf(r)!=='cancel');
+      const done = live.filter(r=>statusOf(r)==='done').length;
+      const pct = live.length ? Math.round(done/live.length*100) : 100;
+      return '<section class="group '+(closed[name]?'closed':'')+'" data-g="'+esc(name)+'">'
+        + '<div class="ghd" role="button" tabindex="0" aria-expanded="'+(!closed[name])+'">'
+        + '<span class="caret">▼</span>'
+        + '<span class="gname">'+esc(name)+'<em>'+g.length+'건</em></span>'
+        + '<span class="gmini"><i style="width:'+pct+'%"></i></span>'
+        + '<span class="gstat">'+done+'/'+live.length+'</span></div>'
+        + '<div class="rows">'+g.map(rowHTML).join('')+'</div></section>';
+    }).join('');
+  }
+  updateCounts();
+}
+
+/* 선택한 품목의 현장·신청일 합계 */
+function itemSummary(){
+  const el = $('#itemSum');
+  if(filter.item==='all'){ el.innerHTML=''; return; }
+  const g = activeRows().filter(r=>ikey(r)===filter.item);
+  if(!g.length){ el.innerHTML=''; return; }
+  const live = g.filter(r=>statusOf(r)!=='cancel');
+  const unit = live.length && live.every(r=>r.unit===live[0].unit) ? (live[0].unit||'') : '';
+  const ord = live.reduce((s,r)=>s+qtyOf(r), 0);
+  const got = live.reduce((s,r)=>s+recvOf(r), 0);
+  const done = live.filter(r=>statusOf(r)==='done').length;
+  const bySite = {};
+  live.forEach(r=>{ const b = bySite[r.site] = bySite[r.site] || {o:0,g:0}; b.o += qtyOf(r); b.g += recvOf(r); });
+  el.innerHTML = '<div class="isum"><div class="ititle">'+esc(g[0].spec)
+    + '<em>'+esc(g[0].code||'')+(g[0].code?' · ':'')+esc(g[0].maker||'')+'</em></div>'
+    + '<div class="ifig"><span><b>'+num(ord)+'</b>'+esc(unit)+'<i>발주</i></span>'
+    + '<span><b>'+num(got)+'</b>'+esc(unit)+'<i>입고</i></span>'
+    + '<span class="rest"><b>'+num(ord-got)+'</b>'+esc(unit)+'<i>잔량</i></span>'
+    + '<span><b>'+done+'/'+live.length+'</b><i>건 완료</i></span></div>'
+    + '<div class="isite">'+Object.keys(bySite).sort().map(s=>
+        esc(s)+' 발주 '+num(bySite[s].o)+esc(unit)+' · 입고 '+num(bySite[s].g)+esc(unit)).join('　|　')
+    + '</div></div>';
+}
+
+function rowHTML(r){
+  const st = statusOf(r), s = STATE[r.id] || {}, q = qtyOf(r);
+  const cls = st==='done'?'done':st==='part'?'part':st==='cancel'?'cancel':'';
+  let meta = esc(r.code||'') + ' · 신청 ' + esc(r.date);
+  if(st==='cancel' && s.cancel.why) meta += ' · 사유 ' + esc(s.cancel.why);
+  else if(edited(r) && s.qmemo) meta += ' · 정정사유 ' + esc(s.qmemo);
+
+  let recvHTML;
+  if(st==='cancel'){
+    recvHTML = '<div class="stampwrap"><span class="stamp"><b>취소</b><span>'+esc((s.cancel.date||'').slice(5))+'</span></span></div>';
+  }else if(st==='pend'){
+    recvHTML = '<span class="meta">미입고</span>';
+  }else{
+    recvHTML = '<div class="stampwrap"><span class="stamp"><b>'+(st==='done'?'입고':'부분')+'</b><span>'
+      + esc((s.date||'').slice(5)) + '</span></span>'
+      + '<span><input class="qin" type="number" min="0" value="'+s.recv+'" '+(isAdmin?'data-act="recv"':'readonly')+' aria-label="입고수량">'
+      + '<div class="meta" style="text-align:right">입고수량</div></span></div>';
+  }
+
+  return '<div class="row '+cls+'" data-id="'+esc(r.id)+'" data-site="'+esc(r.site)+'">'
+    + '<span class="notch"></span>'
+    + '<span class="box" role="checkbox" tabindex="'+(isAdmin?'0':'-1')+'" aria-checked="'+(st==='done'||st==='part')+'" '+(isAdmin?'data-act="toggle"':'')+' aria-label="입고 처리">'
+    + '<svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></span>'
+    + '<span class="badge">'+esc(r.site)+'</span>'
+    + '<div class="item"><div class="spec">'+esc(r.spec)
+      + (edited(r)?'<span class="tag">수량정정</span>':'')
+      + (st==='cancel'?'<span class="tag can">발주취소</span>':'')
+      + '</div><div class="meta">'+meta+'</div></div>'
+    + '<div class="qty">'+(edited(r)?'<del>'+num(r.qty)+'</del>':'')
+      + '<b>'+num(q)+'</b><span>'+esc(r.unit||'')+'</span>'
+      + '<div class="meta">발주수량</div></div>'
+    + '<div class="recv">'+recvHTML+'</div>'
+    + (isAdmin?'<button class="more" data-act="edit" aria-label="수량 정정 · 발주 취소">···</button>':'')
+    + (openEdit===r.id ? editHTML(r,s,st) : '')
+    + '</div>';
+}
+
+function editHTML(r,s,st){
+  if(st==='cancel'){
+    return '<div class="edit"><span style="font-size:12px;color:var(--ink2)"><b>'+esc(s.cancel.date)
+      + '</b> 발주 취소됨' + (s.cancel.why?' · '+esc(s.cancel.why):'') + '</span>'
+      + '<button class="btn" data-act="uncancel">발주 되살리기</button>'
+      + '<button class="btn" data-act="close">닫기</button></div>';
+  }
+  return '<div class="edit">'
+    + '<label>발주수량 정정<input class="num" type="number" min="0" value="'+qtyOf(r)+'" data-act="setqty"></label>'
+    + '<label>사유 (선택)<input class="why" type="text" value="'+esc(s.qmemo||'')+'" placeholder="예: 현장 물량 조정" data-act="setmemo"></label>'
+    + '<button class="btn warn" data-act="cancel">발주 취소</button>'
+    + (edited(r)?'<button class="btn" data-act="restoreqty">원래 수량으로</button>':'')
+    + '<button class="btn" data-act="close">닫기</button>'
+    + '<div class="note">원 발주수량 '+num(r.qty)+esc(r.unit||'')+' · 정정하면 입고 완료 판정도 새 수량 기준으로 바뀝니다.</div></div>';
+}
+
+function updateCounts(){
+  let p=0,q=0,d=0,c=0;
+  activeRows().forEach(r=>{ const s=statusOf(r); if(s==='done')d++; else if(s==='part')q++; else if(s==='cancel')c++; else p++; });
+  $('#cPend').textContent=p; $('#cPart').textContent=q; $('#cDone').textContent=d; $('#cCan').textContent=c;
+  const live = activeRows().length-c;
+  $('#bar').style.width = live ? (d/live*100)+'%' : '0%';
+  $('#archN').textContent = Object.keys(ARCH).length;
+}
+
+/* ---------- 이벤트 ---------- */
+$('#list').addEventListener('click', e=>{
+  const act = e.target.closest('[data-act]');
+  const row = e.target.closest('.row');
+  const a = act && act.dataset.act;
+  if(a && row){
+    if(a==='toggle'){ toggle(row.dataset.id); return; }
+    if(a==='edit'){ openEdit = openEdit===row.dataset.id ? null : row.dataset.id; render(); return; }
+    if(a==='close'){ openEdit = null; render(); return; }
+    if(a==='cancel'){ doCancel(row.dataset.id); return; }
+    if(a==='uncancel'){ openEdit=null; patch(row.dataset.id, {cancel:null}); toast('발주를 되살렸습니다'); return; }
+    if(a==='restoreqty'){ patch(row.dataset.id, {qty:null, qmemo:null}); toast('원래 수량으로 되돌렸습니다'); return; }
+  }
+  const hd = e.target.closest('.ghd');
+  if(hd){ const n = hd.parentElement.dataset.g; closed[n]=!closed[n]; render(); }
+});
+$('#list').addEventListener('keydown', e=>{
+  if(e.key!=='Enter' && e.key!==' ') return;
+  const box = e.target.closest('[data-act="toggle"]');
+  if(box){ e.preventDefault(); toggle(box.closest('.row').dataset.id); return; }
+  const hd = e.target.closest('.ghd');
+  if(hd){ e.preventDefault(); const n=hd.parentElement.dataset.g; closed[n]=!closed[n]; render(); }
+});
+$('#list').addEventListener('change', e=>{
+  const act = e.target.closest('[data-act]'); if(!act) return;
+  const id = act.closest('.row').dataset.id, a = act.dataset.act;
+  if(a==='recv'){
+    patch(id, {recv: act.value===''?0:Math.max(0,Number(act.value)), date:(STATE[id]&&STATE[id].date)||today()});
+  }else if(a==='setqty'){
+    const r = ROWS.find(x=>x.id===id);
+    const v = act.value===''?Number(r.qty):Math.max(0,Number(act.value));
+    patch(id, {qty: v===Number(r.qty)?null:v});
+    toast('발주수량을 '+num(v)+(r.unit||'')+'(으)로 정정했습니다');
+  }else if(a==='setmemo'){
+    patch(id, {qmemo: act.value.trim()||null});
+  }
+});
+
+function toggle(id){
+  if(!isAdmin){ toast('읽기 전용입니다'); return; }
+  const r = ROWS.find(x=>x.id===id); if(!r) return;
+  const st = statusOf(r);
+  if(st==='cancel'){ toast('취소된 발주입니다. ··· 에서 되살린 뒤 체크하세요'); return; }
+  if(st==='pend') patch(id, {recv:qtyOf(r), date:today()});
+  else patch(id, {recv:null, date:null});
+}
+function doCancel(id){
+  if(!isAdmin){ toast('읽기 전용입니다'); return; }
+  const r = ROWS.find(x=>x.id===id); if(!r) return;
+  const why = prompt('발주 취소 사유를 입력하세요 (선택)\n\n'+r.spec+' / '+num(qtyOf(r))+(r.unit||''), '');
+  if(why===null) return;
+  openEdit = null;
+  patch(id, {cancel:{why:why.trim(), date:today()}, recv:null, date:null});
+  toast('발주를 취소했습니다');
+}
+
+$('#segSite').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  filter.site = b.dataset.site;
+  [].forEach.call(e.currentTarget.children, x=>x.setAttribute('aria-pressed', x===b));
+  render();
+});
+$('#dateSel').addEventListener('change', e=>{ filter.date = e.target.value; render(); });
+$('#itemSel').addEventListener('change', e=>{ filter.item = e.target.value; render(); });
+$('#onlyPend').addEventListener('change', e=>{ filter.pend = e.target.checked; render(); });
+$('#q').addEventListener('input', e=>{ filter.q = e.target.value; render(); });
+
+$('#sync').addEventListener('click', async e=>{ if(e.target.id==='btnPull') await pull(); });
+
+$('#btnReset').addEventListener('click', ()=>{
+  if(!isAdmin){ toast('읽기 전용입니다'); return; }
+  if(!confirm('입고 체크 · 수량정정 · 발주취소 기록과 보관함을 모두 지웁니다.\n발주 목록 자체는 남습니다. 계속할까요?')) return;
+  STATE = {}; ARCH = {}; noAuto = {}; openEdit = null; save(); render(); toast('기록을 초기화했습니다');
+});
+
+/* ---------- 내보내기 ---------- */
+function tableAOA(){
+  const head = ['현장','구매신청일','품목코드','제품규격','단위','원발주수량','현재발주수량','제조업체',
+                '입고일','입고수량','미입고수량','상태','정리','비고'];
+  const body = ROWS.map(r=>{
+    const st = statusOf(r), s = STATE[r.id]||{}, q = qtyOf(r);
+    const recv = (st==='pend'||st==='cancel') ? '' : Number(s.recv);
+    const memo = st==='cancel' ? ('취소사유: '+(s.cancel.why||'-'))
+               : (edited(r) ? ('정정사유: '+(s.qmemo||'-')) : '');
+    return [r.site, r.date, r.code, r.spec, r.unit, Number(r.qty), st==='cancel'?0:q, r.maker,
+            st==='cancel'?s.cancel.date:(st==='pend'?'':s.date), recv,
+            st==='cancel'?0:q-(recv||0),
+            st==='done'?'입고완료':st==='part'?'부분입고':st==='cancel'?'발주취소':'미입고',
+            isArch(r)?'보관':'', memo];
+  });
+  return [head].concat(body);
+}
+function xlsxBlob(){
+  const ws = XLSX.utils.aoa_to_sheet(tableAOA());
+  ws['!cols'] = [{wch:8},{wch:12},{wch:16},{wch:40},{wch:6},{wch:12},{wch:13},{wch:12},{wch:12},{wch:10},{wch:11},{wch:10},{wch:6},{wch:26}];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '입고현황');
+  return new Blob([XLSX.write(wb, {bookType:'xlsx', type:'array'})],
+    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function summaryText(){
+  const rows = visible();
+  const pick = filter.item==='all' ? null : activeRows().find(r=>ikey(r)===filter.item);
+  const scope = (filter.site==='all'?'평택+기흥':filter.site) + ' · '
+              + (filter.date==='all'?'전체 신청일':filter.date+' 신청분')
+              + (pick ? ' · 품목 '+pick.spec+(pick.code?' ('+pick.code+')':'') : '');
+  let d=0,p=0,q=0,c=0;
+  rows.forEach(r=>{ const s=statusOf(r); if(s==='done')d++; else if(s==='part')q++; else if(s==='cancel')c++; else p++; });
+  const L = ['[자재 입고 현황] '+today()+' '+nowHM(), scope,
+             '총 '+rows.length+'건 · 입고완료 '+d+' · 부분입고 '+q+' · 미입고 '+p+(c?' · 취소 '+c:''), ''];
+  const pend = rows.filter(r=>{ const s=statusOf(r); return s==='pend'||s==='part'; });
+  if(pend.length){
+    L.push('■ 미입고 / 부분입고');
+    const by = {};
+    pend.forEach(r=>{ (by[r.maker]=by[r.maker]||[]).push(r); });
+    Object.keys(by).sort().forEach(m=>{
+      L.push('· '+m);
+      by[m].forEach(r=>{
+        const s = STATE[r.id]||{}, st = statusOf(r);
+        L.push('  - ['+r.site+'] '+r.spec+' '+num(qtyOf(r))+(r.unit||'')
+          + (st==='part' ? ' (입고 '+num(s.recv)+' / 잔량 '+num(qtyOf(r)-s.recv)+')' : '')
+          + ' · 신청 '+r.date);
+      });
+    });
+  }else{
+    L.push('■ 미입고 없음 — 전량 입고 완료');
+  }
+  const can = rows.filter(r=>statusOf(r)==='cancel');
+  if(can.length){
+    L.push('', '■ 발주취소');
+    can.forEach(r=>{
+      const w = STATE[r.id].cancel.why;
+      L.push('  - ['+r.site+'] '+r.maker+' '+r.spec+(w?' · '+w:''));
+    });
+  }
+  return L.join('\n');
+}
+
+/* ---------- 공유 ---------- */
+function openSheet(html){ $('#sheet').innerHTML = html; $('#sheet').classList.add('on'); $('#scrim').classList.add('on'); }
+function closeSheet(){ $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
+$('#scrim').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSheet(); });
+
+$('#btnShare').addEventListener('click', ()=>{
+  const n = visible().length;
+  openSheet('<h2>공유하기</h2><p class="sub">지금 화면에 보이는 '+n+'건 기준으로 만듭니다.</p>'
+    + '<button class="opt" data-s="text"><span class="ic">💬</span><span><b>현황 요약 보내기</b>'
+    + '<em>미입고 목록을 글로 정리해 카카오톡·문자로 바로 보냅니다.</em></span></button>'
+    + '<button class="opt" data-s="pdf"><span class="ic">🖨️</span><span><b>PDF로 저장</b>'
+    + '<em>지금 화면에 보이는 항목을 A4 문서로 뽑습니다. 인쇄창에서 대상을 “PDF로 저장”으로 바꾸세요. 접어둔 업체도 모두 펼쳐서 나옵니다.</em></span></button>'
+    + '<button class="opt" data-s="ro"><span class="ic">🔒</span><span><b>읽기 전용 파일 보내기</b>'
+    + '<em>지금 현황이 그대로 박힌 HTML 파일을 만듭니다. 받은 사람은 열어서 보기만 되고, 체크·수정은 안 됩니다. (필터와 무관하게 전체 발주 기준)</em></span></button>'
+    + '<button class="opt" data-s="file"><span class="ic">📗</span><span><b>엑셀 파일 보내기</b>'
+    + '<em>입고일·입고수량·상태가 채워진 xlsx를 공유하거나 내려받습니다.</em></span></button>'
+    + '<button class="opt" data-s="backup"><span class="ic">💾</span><span><b>체크 기록 백업 · 복원</b>'
+    + '<em>기록을 파일로 저장하거나, 남이 보낸 기록 파일을 불러옵니다.</em></span></button>');
+});
+
+$('#sheet').addEventListener('click', async e=>{
+  const opt = e.target.closest('[data-s]');
+  if(opt){ handleShare(opt.dataset.s); return; }
+  if(e.target.id==='btnCopy'){
+    const ta = $('#shTa'); ta.select();
+    try{ await navigator.clipboard.writeText(ta.value); toast('복사했습니다. 카톡에 붙여넣기 하세요'); }
+    catch(err){ try{ document.execCommand('copy'); toast('복사했습니다'); }catch(e2){ toast('직접 선택해 복사해 주세요'); } }
+  }
+  if(e.target.id==='btnDl'){ dl(xlsxBlob(), '입고현황_'+today().replace(/-/g,'')+'.xlsx'); closeSheet(); }
+  if(e.target.id==='btnRo'){ dl(roBlob(), roName()); closeSheet(); toast('읽기 전용 파일을 내려받았습니다'); }
+  if(e.target.id==='btnBak'){
+    dl(new Blob([JSON.stringify({state:STATE,rows:ROWS,at:Date.now()})],{type:'application/json'}),
+       '입고기록_'+today().replace(/-/g,'')+'.json');
+  }
+  if(e.target.id==='btnClose') closeSheet();
+});
+
+function dl(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+async function handleShare(kind){
+  if(kind==='text'){
+    const txt = summaryText();
+    if(navigator.share){
+      try{ await navigator.share({title:'자재 입고 현황', text:txt}); closeSheet(); return; }
+      catch(err){ if(err && err.name==='AbortError'){ closeSheet(); return; } }
+    }
+    openSheet('<h2>현황 요약</h2><p class="sub">복사해서 카카오톡에 붙여넣으세요.</p>'
+      + '<textarea id="shTa" readonly>'+esc(txt)+'</textarea>'
+      + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pri" id="btnCopy">복사하기</button>'
+      + '<button class="btn" id="btnClose">닫기</button></div>');
+    return;
+  }
+  if(kind==='file'){
+    if(!window.XLSX){ toast('엑셀 모듈을 불러오지 못했습니다 (인터넷 연결 확인)'); return; }
+    const blob = xlsxBlob();
+    const file = new File([blob], '입고현황_'+today().replace(/-/g,'')+'.xlsx', {type:blob.type});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:'자재 입고 현황'}); closeSheet(); return; }
+      catch(err){ if(err && err.name==='AbortError'){ closeSheet(); return; } }
+    }
+    openSheet('<h2>엑셀 파일</h2><p class="sub">이 기기에서는 바로 보내기가 안 됩니다. 내려받은 뒤 카카오톡에 첨부하세요.</p>'
+      + '<div style="display:flex;gap:8px"><button class="btn pri" id="btnDl">파일 내려받기</button>'
+      + '<button class="btn" id="btnClose">닫기</button></div>');
+    return;
+  }
+  if(kind==='pdf'){
+    printNow(); closeSheet(); return;
+  }
+  if(kind==='ro'){
+    const blob = roBlob(), name = roName();
+    const file = new File([blob], name, {type:'text/html'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:'자재 입고 현황 (읽기 전용)'}); closeSheet(); return; }
+      catch(err){ if(err && err.name==='AbortError'){ closeSheet(); return; } }
+    }
+    openSheet('<h2>읽기 전용 파일</h2>'
+      + '<p class="sub">내려받은 뒤 카카오톡·메일에 첨부해서 보내세요. 받는 사람은 브라우저로 열어 보기만 할 수 있습니다.</p>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" id="btnRo">파일 내려받기</button>'
+      + '<button class="btn" id="btnClose">닫기</button></div>');
+    return;
+  }
+  if(kind==='backup'){
+    openSheet('<h2>체크 기록 백업 · 복원</h2>'
+      + '<p class="sub">같은 파일을 쓰는 사람끼리 기록을 주고받아 맞출 수 있습니다.</p>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      + '<button class="btn pri" id="btnBak">기록 내려받기 (.json)</button>'
+      + '<label class="btn" style="cursor:pointer">기록 불러오기<input type="file" id="restore" accept=".json" hidden></label>'
+      + '<button class="btn" id="btnClose">닫기</button></div>');
+    $('#restore').addEventListener('change', async ev=>{
+      if(!isAdmin){ toast('복원은 관리자만 가능합니다'); return; }
+      const f = ev.target.files[0]; if(!f) return;
+      try{
+        const o = JSON.parse(await f.text());
+        if(!o.state) throw new Error('bad');
+        STATE = o.state; if(o.rows && o.rows.length) ROWS = o.rows;
+        save(); render(); closeSheet(); toast('기록을 불러왔습니다');
+      }catch(err){ toast('기록 파일을 읽지 못했습니다'); }
+    });
+  }
+}
+
+
+/* ---------- 인쇄 · PDF ---------- */
+function printNow(){
+  const rows = visible();
+  let d=0,q=0,p=0,c=0;
+  rows.forEach(r=>{ const st=statusOf(r); if(st==='done')d++; else if(st==='part')q++; else if(st==='cancel')c++; else p++; });
+  const scope = (filter.site==='all'?'평택 + 기흥':filter.site) + ' · '
+              + (filter.date==='all'?'전체 신청일':filter.date+' 신청분')
+              + (filter.pend?' · 미입고만':'') + (filter.q.trim()?' · 검색 "'+esc(filter.q.trim())+'"':'');
+  $('#ph').innerHTML = '<h2>자재 입고 현황</h2><div class="pm">'
+    + '<b>' + esc(scope) + '</b><br>'
+    + '총 ' + rows.length + '건 · 입고완료 ' + d + ' · 부분입고 ' + q + ' · 미입고 ' + p + (c?' · 발주취소 '+c:'')
+    + ' &nbsp;|&nbsp; 출력 ' + today() + ' ' + nowHM() + '</div>';
+  const reopen = openEdit;
+  openEdit = null; render();
+  setTimeout(()=>{
+    window.print();
+    if(reopen){ openEdit = reopen; render(); }
+  }, 120);
+}
+
+/* ---------- 읽기 전용 사본 만들기 ---------- */
+function roData(){
+  return {
+    at: today()+' '+nowHM(),
+    rows: ROWS.map(function(r){
+      var st = statusOf(r), s = STATE[r.id] || {};
+      return {
+        site:r.site, date:r.date, code:r.code||'', spec:r.spec, unit:r.unit||'', maker:r.maker,
+        oq:Number(r.qty), q:qtyOf(r), st:st,
+        rd:(st==='cancel') ? (s.cancel.date||'') : (s.date||''),
+        recv:(st==='pend'||st==='cancel') ? null : Number(s.recv),
+        memo:(st==='cancel') ? (s.cancel.why||'') : (edited(r) ? (s.qmemo||'') : ''),
+        ed: edited(r) && st!=='cancel',
+        arch: isArch(r)
+      };
+    })
+  };
+}
+
+const RO_CSS = `
+/* --- 읽기 전용 오버라이드 --- */
+.box{cursor:default}
+.box:hover{border-color:var(--ink3)}
+.rq{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.tag.arc{background:#EEF1F4;color:var(--ink3)}
+.sync.ro{background:#F7F9FB}
+.ro-lock{font-size:11px;font-weight:800;letter-spacing:.06em;color:#93A6B8;border:1px solid #35485A;
+  border-radius:5px;padding:3px 8px;align-self:center}
+@media print{
+  header{display:block!important;position:static!important;box-shadow:none;
+    background:#fff!important;color:var(--ink)!important;border-bottom:2px solid var(--ink)}
+  header .wrap{max-width:none;padding:0}
+  .hd{padding:0 0 8px}
+  h1{font-size:16px} h1 small{color:var(--ink2)}
+  .count span{color:var(--ink2)} .count.ok b{color:var(--done)} .count.mut b{color:var(--ink3)}
+  .count b{font-size:17px}
+  .bar{display:none}
+  footer{display:block!important;padding-top:12px}
+  .printhead{display:none!important}
+  .tools,.sync,.toast{display:none!important}
+  .ghd{break-after:avoid;page-break-after:avoid}
+  body{background:#fff;padding-bottom:0}
+}`;
+
+const RO_BODY = `
+<header><div class="wrap"><div class="hd">
+<h1>자재 입고 현황<small id="hdsub">읽기 전용 사본</small></h1>
+<div class="counts">
+<div class="count"><b id="cPend">0</b><span>미입고</span></div>
+<div class="count"><b id="cPart">0</b><span>부분입고</span></div>
+<div class="count ok"><b id="cDone">0</b><span>입고완료</span></div>
+<div class="count mut"><b id="cCan">0</b><span>취소</span></div>
+</div></div></div><div class="bar"><i id="bar"></i></div></header>
+<div class="wrap">
+<div class="tools">
+<div class="seg" id="segSite"><button data-site="all" aria-pressed="true">전체</button>
+<button data-site="평택">평택</button><button data-site="기흥">기흥</button></div>
+<select id="dateSel"></select>
+<label class="chk-only"><input type="checkbox" id="onlyPend">미입고만</label>
+<input type="search" id="q" placeholder="제조업체 · 품목 검색">
+<button class="btn" id="btnArch">보관함 <span id="archN">0</span></button>
+<button class="btn pri" id="btnCopy">요약 복사</button>
+<button class="btn" id="btnPrint">인쇄 · PDF</button>
+</div>
+<div class="sync ro"><span class="dot solo"></span><b>읽기 전용</b>
+<span id="rosub">받은 시점의 입고 현황입니다. 이 파일에서는 체크·수정이 되지 않습니다.</span></div>
+<div id="list"></div>
+<footer id="ft"></footer>
+</div>
+<div class="toast" id="toast"></div>`;
+
+const RO_JS = `
+var F={site:'all',date:'all',q:'',pend:false,arch:false}, CL={};
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var num=function(n){return Number(n||0).toLocaleString()};
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2200)}
+function scoped(){return D.rows.filter(function(r){return F.arch ? r.arch : !r.arch})}
+function vis(){
+  var q=F.q.trim().toLowerCase();
+  return scoped().filter(function(r){
+    if(F.site!=='all' && r.site!==F.site) return false;
+    if(F.date!=='all' && r.date!==F.date) return false;
+    if(F.pend && (r.st==='done'||r.st==='cancel')) return false;
+    if(q && (r.maker+' '+r.spec+' '+r.code).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+}
+function fillDates(){
+  var sc=scoped(), c={};
+  sc.forEach(function(r){c[r.date]=(c[r.date]||0)+1});
+  var ds=Object.keys(c).sort().reverse();
+  if(!c[F.date]) F.date='all';
+  var sel=$('#dateSel');
+  var sig=ds.join('|')+'#'+sc.length;
+  if(sel._sig===sig){sel.value=F.date;return}
+  sel._sig=sig;
+  sel.innerHTML='<option value="all">전체 신청일 · '+sc.length+'건</option>'
+    +ds.map(function(d){return '<option value="'+d+'">'+d+' · '+c[d]+'건</option>'}).join('');
+  sel.value=F.date;
+}
+function rowHTML(r){
+  var cls=r.st==='done'?'done':r.st==='part'?'part':r.st==='cancel'?'cancel':'';
+  var meta=esc(r.code)+' · 신청 '+esc(r.date);
+  if(r.memo) meta+=(r.st==='cancel'?' · 사유 ':' · 정정사유 ')+esc(r.memo);
+  var rv;
+  if(r.st==='cancel'){
+    rv='<div class="stampwrap"><span class="stamp"><b>취소</b><span>'+esc(r.rd.slice(5))+'</span></span></div>';
+  }else if(r.st==='pend'){
+    rv='<span class="meta">미입고</span>';
+  }else{
+    rv='<div class="stampwrap"><span class="stamp"><b>'+(r.st==='done'?'입고':'부분')+'</b><span>'
+      +esc(r.rd.slice(5))+'</span></span><span><b class="rq">'+num(r.recv)
+      +'</b><div class="meta" style="text-align:right">입고수량</div></span></div>';
+  }
+  return '<div class="row '+cls+'" data-site="'+esc(r.site)+'">'
+    +'<span class="notch"></span>'
+    +'<span class="box"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></span>'
+    +'<span class="badge">'+esc(r.site)+'</span>'
+    +'<div class="item"><div class="spec">'+esc(r.spec)
+    +(r.ed?'<span class="tag">수량정정</span>':'')
+    +(r.st==='cancel'?'<span class="tag can">발주취소</span>':'')
+    +(r.arch?'<span class="tag arc">보관</span>':'')
+    +'</div><div class="meta">'+meta+'</div></div>'
+    +'<div class="qty">'+(r.ed?'<del>'+num(r.oq)+'</del>':'')+'<b>'+num(r.q)+'</b><span>'+esc(r.unit)+'</span>'
+    +'<div class="meta">발주수량</div></div>'
+    +'<div class="recv">'+rv+'</div></div>';
+}
+function render(){
+  fillDates();
+  var rows=vis(), g={};
+  rows.forEach(function(r){(g[r.maker]=g[r.maker]||[]).push(r)});
+  var names=Object.keys(g).sort(function(a,b){return g[b].length-g[a].length||a.localeCompare(b,'ko')});
+  var list=$('#list');
+  if(!rows.length){
+    list.innerHTML='<div class="empty">'+(F.arch?'보관된 신청분이 없습니다.':'조건에 맞는 발주 항목이 없습니다.<br>필터를 바꾸거나 검색어를 지워보세요.')+'</div>';
+  }else{
+    list.innerHTML=names.map(function(n){
+      var a=g[n].slice().sort(function(x,y){return (x.st==='cancel')-(y.st==='cancel')});
+      var live=a.filter(function(r){return r.st!=='cancel'});
+      var done=live.filter(function(r){return r.st==='done'}).length;
+      var pct=live.length?Math.round(done/live.length*100):100;
+      return '<section class="group '+(CL[n]?'closed':'')+'" data-g="'+esc(n)+'">'
+        +'<div class="ghd" role="button" tabindex="0"><span class="caret">▼</span>'
+        +'<span class="gname">'+esc(n)+'<em>'+a.length+'건</em></span>'
+        +'<span class="gmini"><i style="width:'+pct+'%"></i></span>'
+        +'<span class="gstat">'+done+'/'+live.length+'</span></div>'
+        +'<div class="rows">'+a.map(rowHTML).join('')+'</div></section>';
+    }).join('');
+  }
+  counts();
+}
+function counts(){
+  var p=0,q=0,d=0,c=0;
+  D.rows.forEach(function(r){ if(r.arch) return;
+    if(r.st==='done')d++; else if(r.st==='part')q++; else if(r.st==='cancel')c++; else p++; });
+  $('#cPend').textContent=p; $('#cPart').textContent=q; $('#cDone').textContent=d; $('#cCan').textContent=c;
+  var live=p+q+d;
+  $('#bar').style.width=(live?(d/live*100):0)+'%';
+  $('#archN').textContent=D.rows.filter(function(r){return r.arch}).length;
+}
+function summary(){
+  var rows=vis();
+  var scope=(F.site==='all'?'평택+기흥':F.site)+' · '+(F.date==='all'?'전체 신청일':F.date+' 신청분');
+  var d=0,q=0,p=0,c=0;
+  rows.forEach(function(r){ if(r.st==='done')d++; else if(r.st==='part')q++; else if(r.st==='cancel')c++; else p++; });
+  var L=['[자재 입고 현황] '+D.at+' 기준', scope,
+    '총 '+rows.length+'건 · 입고완료 '+d+' · 부분입고 '+q+' · 미입고 '+p+(c?' · 취소 '+c:''), ''];
+  var pend=rows.filter(function(r){return r.st==='pend'||r.st==='part'});
+  if(pend.length){
+    L.push('■ 미입고 / 부분입고');
+    var by={}; pend.forEach(function(r){(by[r.maker]=by[r.maker]||[]).push(r)});
+    Object.keys(by).sort().forEach(function(m){
+      L.push('· '+m);
+      by[m].forEach(function(r){
+        L.push('  - ['+r.site+'] '+r.spec+' '+num(r.q)+r.unit
+          +(r.st==='part'?' (입고 '+num(r.recv)+' / 잔량 '+num(r.q-r.recv)+')':'')+' · 신청 '+r.date);
+      });
+    });
+  }else L.push('■ 미입고 없음 — 전량 입고 완료');
+  return L.join('\\n');
+}
+$('#segSite').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  F.site=b.dataset.site;
+  [].forEach.call(this.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x===b)});
+  render();
+});
+$('#dateSel').addEventListener('change',function(){F.date=this.value;render()});
+$('#onlyPend').addEventListener('change',function(){F.pend=this.checked;render()});
+$('#q').addEventListener('input',function(){F.q=this.value;render()});
+$('#btnArch').addEventListener('click',function(){
+  F.arch=!F.arch; F.date='all';
+  this.classList.toggle('pri',F.arch);
+  $('#rosub').textContent=F.arch?'전량 입고돼 정리된 신청분입니다.':'받은 시점의 입고 현황입니다. 이 파일에서는 체크·수정이 되지 않습니다.';
+  render();
+});
+$('#btnPrint').addEventListener('click',function(){window.print()});
+$('#btnCopy').addEventListener('click',async function(){
+  var t=summary();
+  try{ await navigator.clipboard.writeText(t); toast('요약을 복사했습니다'); }
+  catch(e){
+    var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast('요약을 복사했습니다'); }catch(e2){ toast('복사에 실패했습니다'); }
+    ta.remove();
+  }
+});
+$('#list').addEventListener('click',function(e){
+  var hd=e.target.closest('.ghd'); if(!hd) return;
+  var n=hd.parentElement.dataset.g; CL[n]=!CL[n]; render();
+});
+$('#hdsub').textContent=D.at+' 기준 · 조회 전용';
+$('#ft').innerHTML='읽기 전용 사본입니다. 체크·수정·자동 저장이 모두 꺼져 있어, 이 파일을 아무리 열어봐도 현황은 바뀌지 않습니다.<br>'
+  +'생성 시각 '+D.at+' · 총 '+D.rows.length+'건 · 최신 현황은 담당자에게 다시 요청하세요.';
+render();`;
+
+function roDoc(){
+  var css = document.querySelector('style').textContent;
+  var json = JSON.stringify(roData()).replace(/</g, '\\u003c');
+  return '<!doctype html><html lang="ko"><head><meta charset="utf-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    + '<title>자재 입고 현황 (읽기 전용) ' + today() + '</title>'
+    + '<style>' + css + RO_CSS + '</style></head><body>'
+    + RO_BODY
+    + '<script>var D=' + json + ';' + RO_JS + '<\/script></body></html>';
+}
+function roName(){ return '입고현황_읽기전용_' + today().replace(/-/g,'') + '.html'; }
+function roBlob(){ return new Blob([roDoc()], {type:'text/html;charset=utf-8'}); }
+
+/* ---------- 보관함 ---------- */
+$('#btnArch').addEventListener('click', showArch);
+
+function showArch(){
+  const keys = Object.keys(ARCH).sort().reverse();
+  let html = '<h2>보관함</h2><p class="sub">전량 입고돼 목록에서 내려간 신청분입니다. 기록은 그대로 남아 있고 엑셀 내보내기에도 포함됩니다.</p>';
+  if(!keys.length){
+    html += '<div class="empty" style="padding:28px 10px">아직 정리된 신청분이 없습니다.<br>한 신청일의 발주가 전량 입고되면 여기로 옮겨집니다.</div>';
+  }else{
+    html += keys.map(k=>{
+      const p = k.split('|'), a = ARCH[k];
+      const n = ROWS.filter(r=>bkey(r)===k).length;
+      return '<div class="opt" style="cursor:default"><span class="ic">📦</span><span style="flex:1">'
+        + '<b>'+p[1]+' · '+p[0]+' 신청분</b><em>'+n+'건 전량 입고 · '+(a.at||'')+' 정리됨</em>'
+        + '<span style="display:flex;gap:7px;margin-top:9px">'
+        + '<button class="btn" data-un="'+esc(k)+'">목록으로 되돌리기</button>'
+        + '<button class="btn warn" data-del="'+esc(k)+'">완전 삭제</button></span></span></div>';
+    }).join('');
+  }
+  html += '<label class="chk-only" style="margin-top:6px"><input type="checkbox" id="autoArchChk"'
+        + (autoArch?' checked':'') + '>전량 입고되면 자동으로 정리하기</label>'
+        + '<div style="margin-top:12px"><button class="btn" id="btnClose">닫기</button></div>';
+  openSheet(html);
+}
+
+$('#sheet').addEventListener('change', e=>{
+  if(e.target.id==='autoArchChk'){
+    if(!isAdmin){ toast('읽기 전용입니다'); return; }
+    autoArch = e.target.checked;
+    if(autoArch) sweep();
+    save(); render(); showArch();
+  }
+});
+$('#sheet').addEventListener('click', e=>{
+  const un = e.target.getAttribute && e.target.getAttribute('data-un');
+  if(un){ if(!isAdmin){ toast('읽기 전용입니다'); return; } delete ARCH[un]; noAuto[un] = true; save(); render(); showArch(); toast('목록으로 되돌렸습니다 · 자동 정리에서 제외됩니다'); return; }
+  const del = e.target.getAttribute && e.target.getAttribute('data-del');
+  if(del){
+    if(!isAdmin){ toast('읽기 전용입니다'); return; }
+    const p = del.split('|');
+    const n = ROWS.filter(r=>bkey(r)===del).length;
+    if(!confirm(p[1]+' '+p[0]+' 신청분 '+n+'건을 완전히 지웁니다.\n입고 기록도 함께 사라지고 되돌릴 수 없습니다.\n계속할까요?')) return;
+    ROWS.filter(r=>bkey(r)===del).forEach(r=>{ delete STATE[r.id]; });
+    ROWS = ROWS.filter(r=>bkey(r)!==del);
+    delete ARCH[del]; delete noAuto[del];
+    save(); render(); showArch(); toast('삭제했습니다');
+  }
+});
+
+/* ---------- 구매신청서 원본 불러오기 ---------- */
+function parseReqFile(name, wb){
+  const m = name.match(/(P4|평택|기흥)[^0-9]{0,3}(\d{6})/);
+  if(!m) return null;
+  const site = (m[1]==='기흥') ? '기흥' : '평택';
+  const y = m[2];
+  const date = '20'+y.slice(0,2)+'-'+y.slice(2,4)+'-'+y.slice(4,6);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const aoa = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, defval:''});
+  const hi = aoa.findIndex(r => r && r.some(c => String(c).replace(/\s/g,'')==='제품규격'));
+  if(hi < 0) return null;
+  const H = aoa[hi].map(c=>String(c).replace(/\s/g,''));
+  const ix = n => H.indexOf(n);
+  const cSpec=ix('제품규격'), cCode=ix('품명또는코드'), cUnit=ix('단위'),
+        cQty=ix('필요수량'), cMake=ix('제조업체');
+  const rows = [], seen = {};
+  aoa.slice(hi+1).forEach(r=>{
+    const spec = String(r[cSpec]||'').trim();
+    if(!spec) return;
+    const code = String(cCode>=0 ? (r[cCode]||'') : '').trim();
+    let key = site+'|'+date+'|'+(code||spec);
+    if(seen[key]) key += '#'+(++seen[key]); else seen[key] = 1;
+    rows.push({ id:key, site:site, date:date, code:code, spec:spec,
+      unit: String(cUnit>=0?(r[cUnit]||''):'').trim(),
+      qty: Number(String(cQty>=0?r[cQty]:0).replace(/[^0-9.\-]/g,''))||0,
+      maker: String(cMake>=0?(r[cMake]||''):'').trim() || '미지정' });
+  });
+  return rows.length ? {site:site, date:date, rows:rows} : null;
+}
+
+function mergeBatch(b){
+  const k = b.site+'|'+b.date;
+  const old = ROWS.filter(r=>bkey(r)===k);
+  const byKey = {};
+  old.forEach(r=>{ byKey[(r.code||'')+'|'+r.spec] = r.id; });
+  b.rows.forEach(nr=>{
+    const oid = byKey[(nr.code||'')+'|'+nr.spec];
+    if(oid && oid!==nr.id && STATE[oid]){ STATE[nr.id] = STATE[oid]; }
+  });
+  old.forEach(r=>{ if(!b.rows.some(nr=>nr.id===r.id)) delete STATE[r.id]; });
+  ROWS = ROWS.filter(r=>bkey(r)!==k).concat(b.rows);
+  return {added: b.rows.length, replaced: old.length};
+}
+
+$('#fileReq').addEventListener('change', async e=>{
+  if(!isAdmin){ e.target.value=''; toast('읽기 전용입니다'); return; }
+  const files = [].slice.call(e.target.files);
+  e.target.value = '';
+  if(!files.length) return;
+  if(!window.XLSX){ toast('엑셀 읽기 모듈을 불러오지 못했습니다 (인터넷 연결 확인)'); return; }
+  let ok = 0, cnt = 0, bad = [];
+  for(const f of files){
+    try{
+      const wb = XLSX.read(await f.arrayBuffer(), {type:'array'});
+      const b = parseReqFile(f.name, wb);
+      if(!b){ bad.push(f.name); continue; }
+      if(ARCH[b.site+'|'+b.date]) delete ARCH[b.site+'|'+b.date];
+      delete noAuto[b.site+'|'+b.date];
+      const res = mergeBatch(b);
+      ok++; cnt += res.added;
+    }catch(err){ bad.push(f.name); }
+  }
+  ROWS.sort((a,b)=> a.date<b.date?-1:a.date>b.date?1:(a.site<b.site?-1:1));
+  sweep(); save(); render();
+  let msg = ok ? (ok+'개 파일 · '+cnt+'건을 반영했습니다') : '반영된 파일이 없습니다';
+  if(bad.length) msg += ' / 읽지 못함: '+bad.join(', ');
+  toast(msg);
+});
+
+/* ---------- DB 불러오기 ---------- */
+$('#file').addEventListener('change', async e=>{
+  if(!isAdmin){ e.target.value=''; toast('읽기 전용입니다'); return; }
+  const f = e.target.files[0]; if(!f) return;
+  if(!window.XLSX){ toast('엑셀 읽기 모듈을 불러오지 못했습니다 (인터넷 연결 확인)'); return; }
+  try{
+    const wb = XLSX.read(await f.arrayBuffer(), {type:'array'});
+    const out = [];
+    ['평택','기흥'].forEach(sn=>{
+      const ws = wb.Sheets[sn]; if(!ws) return;
+      const aoa = XLSX.utils.sheet_to_json(ws, {header:1, raw:false});
+      const hi = aoa.findIndex(r => r && r.indexOf('제품규격')>=0);
+      if(hi < 0) return;
+      const H = aoa[hi], ix = n => H.indexOf(n);
+      aoa.slice(hi+1).forEach(r=>{
+        if(!r || !r[ix('제품규격')]) return;
+        out.push({ id: sn+'-'+r[ix('No')], site: sn,
+          date: String(r[ix('구매신청일')]||'').slice(0,10),
+          code: r[ix('품목코드')]||'', spec: r[ix('제품규격')],
+          unit: r[ix('단위')]||'', qty: Number(r[ix('필요수량')])||0,
+          maker: r[ix('제조업체')]||'미지정' });
+      });
+    });
+    if(!out.length){ toast('평택 / 기흥 시트를 찾지 못했습니다'); return; }
+    ROWS = out; sweep(); save(); render();
+    toast(out.length+'건을 불러왔습니다');
+  }catch(err){ toast('파일을 읽지 못했습니다'); }
+  e.target.value = '';
+});
+
+/* ---------- 관리자 로그인 ---------- */
+$('#btnAdmin').addEventListener('click', async ()=>{
+  if(!CLOUD_READY){
+    openSheet('<h2>관리자 설정 필요</h2><p class="sub">HTML 상단의 SUPABASE_URL · SUPABASE_ANON_KEY · ADMIN_EMAIL을 먼저 입력하세요.</p><button class="btn" id="btnClose">닫기</button>');
+    return;
+  }
+  if(isAdmin){ await sb.auth.signOut(); await refreshAuth(); toast('읽기 전용으로 전환했습니다'); return; }
+  openSheet('<h2>관리자 로그인</h2><p class="sub">관리자 계정만 수정 권한이 있습니다.</p>'
+    +'<div class="login-row"><input id="admEmail" type="email" placeholder="관리자 이메일" value="'+esc(ADMIN_EMAIL)+'"><input id="admPw" type="password" placeholder="비밀번호"></div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pri" id="btnAdmLogin">로그인</button><button class="btn" id="btnClose">닫기</button></div>');
+});
+
+$('#sheet').addEventListener('click', async e=>{
+  if(e.target.id==='btnAdmLogin'){
+    const email=$('#admEmail').value.trim(), password=$('#admPw').value;
+    const {error}=await sb.auth.signInWithPassword({email,password});
+    if(error){ toast('로그인에 실패했습니다'); return; }
+    await refreshAuth();
+    if(!isAdmin){ await sb.auth.signOut(); await refreshAuth(); toast('허용된 관리자 계정이 아닙니다'); return; }
+    closeSheet(); await pull(true); toast('관리자 수정 모드입니다');
+  }
+});
+
+/* ---------- 시작 ---------- */
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) pull(true); });
+(async()=>{ await refreshAuth(); await pull(true); })();
+</script>
+</body></html>
