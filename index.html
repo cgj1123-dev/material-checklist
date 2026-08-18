@@ -3,8 +3,8 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>자재 입고 체크리스트</title>
-<script src="./자재_입고_체크리스트_공유형_files/xlsx.full.min.js.다운로드"></script>
-<script src="./자재_입고_체크리스트_공유형_files/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --ink:#14202C; --ink2:#4A5C6E; --ink3:#8494A3;
@@ -295,14 +295,15 @@ const ADMIN_EMAIL = 'cgj1123@naver.com';
 const CLOUD_READY = !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_ANON_KEY.startsWith('YOUR_');
 const sb = CLOUD_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-let ROWS = DATA_SEED.slice();
+// Supabase가 유일한 운영 데이터 원본입니다. DATA_SEED는 과거 초기자료 참고용으로만 남겨둡니다.
+let ROWS = [];
 let STATE = {};
 let ARCH = {};
 let noAuto = {};
 let autoArch = true;
 let filter = {site:'all', date:'all', item:'all', q:'', pend:false};
 let closed = {}, openEdit = null, saving = false, lastSync = null;
-let isAdmin = false, currentUser = null;
+let isAdmin = false, currentUser = null, cloudLoaded = false;
 
 const bkey = r => r.site+'|'+r.date;
 const ikey = r => (String(r.code||'').trim() || String(r.spec||'').trim());
@@ -323,18 +324,19 @@ function setRoleUI(){
 }
 
 async function loadRaw(){
-  if(!CLOUD_READY) return null;
-  try{
-    const {data,error} = await sb.from('material_checklist_state').select('payload,updated_at').eq('id',1).single();
-    if(error) throw error;
-    if(data){ lastSync = nowHM(); return data.payload ? JSON.stringify(data.payload) : null; }
-  }catch(e){ console.error(e); }
-  return null;
+  if(!CLOUD_READY) throw new Error('Supabase 설정이 필요합니다');
+  const {data,error} = await sb.from('material_checklist_state')
+    .select('payload,updated_at').eq('id',1).single();
+  if(error) throw error;
+  if(!data || !data.payload) throw new Error('Supabase에 운영 데이터가 없습니다');
+  lastSync = nowHM();
+  return data.payload;
 }
 
 async function save(){
   if(!isAdmin){ toast('읽기 전용입니다'); return; }
   if(!CLOUD_READY){ toast('Supabase 설정이 필요합니다'); return; }
+  if(!cloudLoaded){ toast('서버 데이터를 먼저 불러와야 저장할 수 있습니다'); return; }
   const payload = {state:STATE, rows:ROWS, arch:ARCH, noauto:noAuto, auto:autoArch, at:Date.now()};
   saving=true; syncBar();
   try{
@@ -346,15 +348,25 @@ async function save(){
 }
 
 async function pull(quiet){
-  const raw=await loadRaw();
-  if(raw){ try{
-    const o=JSON.parse(raw);
-    STATE=o.state||{}; ARCH=o.arch||{}; noAuto=o.noauto||{};
-    if(typeof o.auto==='boolean') autoArch=o.auto;
-    if(o.rows && o.rows.length) ROWS=o.rows;
-  }catch(e){} }
-  render(); setRoleUI();
-  if(!quiet) toast('최신 현황을 불러왔습니다');
+  try{
+    const o = await loadRaw();
+    STATE = o.state || {};
+    ARCH = o.arch || {};
+    noAuto = o.noauto || {};
+    if(typeof o.auto === 'boolean') autoArch = o.auto;
+    ROWS = Array.isArray(o.rows) ? o.rows : [];
+    cloudLoaded = true;
+    render(); setRoleUI();
+    if(!quiet) toast('Supabase 최신 현황을 불러왔습니다');
+    return true;
+  }catch(e){
+    console.error(e);
+    cloudLoaded = false;
+    ROWS = []; STATE = {}; ARCH = {}; noAuto = {};
+    render(); setRoleUI();
+    if(!quiet) toast('서버 데이터를 불러오지 못했습니다. 저장은 차단됩니다');
+    return false;
+  }
 }
 
 async function refreshAuth(){
@@ -373,7 +385,7 @@ function syncBar(){
   }
   el.innerHTML='<span class="dot '+(isAdmin?'':'solo')+'"></span>'
     +'<b>'+(isAdmin?'관리자 수정 모드':'읽기 전용')+'</b>'
-    +'<span>'+(isAdmin?'본인만 입고 체크·수량 정정·취소·파일 반영을 할 수 있습니다.':'이 링크를 받은 사람은 최신 현황을 조회만 할 수 있습니다.')+'</span>'
+    +'<span>'+(cloudLoaded?(isAdmin?'Supabase 운영 DB · 본인만 수정할 수 있습니다.':'Supabase 운영 DB의 최신 현황을 조회합니다.'):'서버 데이터 연결 대기/실패 · 저장 차단')+'</span>'
     +'<span style="flex:1"></span>'
     +'<span style="color:var(--ink3)">'+(saving?'저장 중…':(lastSync?'동기화 '+lastSync:''))+'</span>'
     +'<button class="btn" id="btnPull">새로고침</button>';
@@ -1269,6 +1281,6 @@ $('#sheet').addEventListener('click', async e=>{
 
 /* ---------- 시작 ---------- */
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) pull(true); });
-(async()=>{ await refreshAuth(); await pull(true); })();
+(async()=>{ await pull(true); await refreshAuth(); })();
 </script>
 </body></html>
