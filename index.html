@@ -85,6 +85,19 @@ input[type=search]{flex:1;min-width:140px}
 .gmini{width:74px;height:5px;background:var(--paper);border-radius:3px;overflow:hidden;flex:none}
 .gmini i{display:block;height:100%;background:var(--done);width:0;transition:width .3s}
 .gstat{font-size:12px;font-weight:700;color:var(--ink2);flex:none;min-width:52px;text-align:right}
+.gchips{display:flex;gap:5px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+.gchip{font-size:11px;font-weight:800;padding:2px 7px;border-radius:20px;letter-spacing:-.01em;white-space:nowrap}
+.gchip.done{background:var(--done-bg);color:var(--done)}
+.gchip.part{background:var(--part-bg);color:var(--part)}
+.gchip.pend{background:#FBE9E7;color:var(--stamp)}
+.gchip.pend.zero{background:#EEF1F4;color:var(--ink3)}
+/* 신청분 수동 보관 스트립 */
+.archbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 12px 9px 20px;
+  background:#EAF4EE;border-top:1px solid var(--done-bg)}
+.archbar .msg{font-size:12px;font-weight:700;color:var(--done);flex:1;min-width:150px}
+.archbar .msg b{font-weight:800}
+.archbar .btn{padding:6px 12px;font-size:12px}
+.archbar .btn.go{background:var(--done);color:#fff;border-color:var(--done)}
 .caret{flex:none;color:var(--ink3);transition:transform .2s;font-size:11px}
 .group.closed .caret{transform:rotate(-90deg)}
 .group.closed .rows{display:none}
@@ -257,6 +270,7 @@ body.viewer .qin{pointer-events:none;border-color:transparent;background:transpa
     </div>
     <select id="dateSel" title="구매신청일 선택"><option value="all">전체 신청일 · 66건</option><option value="2026-08-12">2026-08-12 · 14건</option><option value="2026-08-10">2026-08-10 · 16건</option><option value="2026-08-06">2026-08-06 · 7건</option><option value="2026-08-04">2026-08-04 · 16건</option><option value="2026-08-03">2026-08-03 · 3건</option><option value="2026-07-30">2026-07-30 · 10건</option></select>
     <select id="itemSel" title="품목 선택"><option value="all">전체 품목 · 48종</option><optgroup label="대상시너스 · 6종"><option value="대상시너스16">방진U-BAND E125 (대상시너스16) · 1건</option><option value="대상시너스25">방진U-BAND E50 (대상시너스25) · 1건</option><option value="대상시너스3">분체-S-BRACKET SB401 (대상시너스3) · 1건</option><option value="대상시너스">분체-SYSTEMCHANNEL 40*40*3H*4000L (대상시너스) · 1건</option><option value="대상시너스54">실리콘패드 40*40 (대상시너스54) · 1건</option><option value="대상시너스61">NUT/PLWASHER M10*65L (대상시너스61) · 1건</option></optgroup><optgroup label="대형 F.I.T · 1종"><option value="대형 에프아이티3">Matt Finish 산처리 구조관 PIPE 50.8*2.0T*6M (대형 에프아이티3) · 1건</option></optgroup><optgroup label="디에스아이테크 · 2종"><option value="디에스아이테크2">SUPER BELLOWS NW125*200L (디에스아이테크2) · 2건</option><option value="디에스아이테크3">SUPER BELLOWS NW160*200L (디에스아이테크3) · 1건</option></optgroup><optgroup label="보영테크 · 17종"><option value="보영테크113">고강도 KF NRC SUS CLAMP NW25 (보영테크113) · 1건</option><option value="보영테크114">고강도 KF NRC SUS CLAMP NW40 (보영테크114) · 1건</option><option value="보영테크115">고강도 KF NRC SUS CLAMP NW50 (보영테크115) · 1건</option><option value="보영테크122">BELLOWS SHAFT JIG 260L (보영테크122) · 1건</option><option value="보영테크19">CENTERING-ORING-OUTERING NW125 (보영테크19) · 2건</option><option value="보영테크20">CENTERING-ORING-OUTERING NW160 (보영테크20) · 1건</option><option value="보영테크13">CENTERING-ORING-OUTERING NW25 (보영테크13) · 1건</option><option value="보영테크14">CENTERING-ORING-OUTERING NW40 (보영테크14) · 1건</option><option value="보영테크15">CENTERING-ORING-OUTERING NW50 (보영테크15) · 3건</option><option value="보영테크72">KF END CAP FLANGE(SUS) NW25 (보영테크72) · 2건</option><option value="보영테크51">KF FLANGE NW100 (보영테크51) · 1건</option><option value="보영테크47">KF FLANGE NW40 (보영테크47) · 1건</option><option value="보영테크48">KF FLANGE NW50 (보영테크48) · 1건</option><option value="보영테크67">NEW MF FLANGE NW100 (보영테크67) · 2건</option><option value="보영테크68">NEW MF FLANGE NW125 (보영테크68) · 3건</option><option value="보영테크69">NEW MF FLANGE NW160 (보영테크69) · 1건</option><option value="보영테크150">NEW MF FLANGE NW63 (보영테크150) · 1건</option></optgroup><optgroup label="삼성물산 · 1종"><option value="DB005020-005858">BLIND FLANGE_KF_SUS304_NW25 (DB005020-005858) · 1건</option></optgroup><optgroup label="삼성밴드 · 15종"><option value="삼성밴드252">Matt Finish 산세 45ELBOW 127 (삼성밴드252) · 2건</option><option value="삼성밴드249">Matt Finish 산세 45ELBOW 50.8 (삼성밴드249) · 1건</option><option value="삼성밴드261">Matt Finish 산세 60ELBOW 127 (삼성밴드261) · 1건</option><option value="삼성밴드271">Matt Finish 산세 80ELBOW 152.4 (삼성밴드271) · 1건</option><option value="삼성밴드273">Matt Finish 산세 90ELBOW 38.1 (삼성밴드273) · 2건</option><option value="삼성밴드274">Matt Finish 산세 90ELBOW 50.8 (삼성밴드274) · 2건</option><option value="삼성밴드296">Matt Finish 산세 REDUCER 101.6*38.1 (삼성밴드296) · 1건</option><option value="삼성밴드297">Matt Finish 산세 REDUCER 101.6*50.8 (삼성밴드297) · 2건</option><option value="삼성밴드301">Matt Finish 산세 REDUCER 127*101.6 (삼성밴드301) · 1건</option><option value="삼성밴드303">Matt Finish 산세 REDUCER 152.4*101.6 (삼성밴드303) · 4건</option><option value="삼성밴드287">Matt Finish 산세 REDUCER 50.8*38.1 (삼성밴드287) · 2건</option><option value="삼성밴드288">Matt Finish 산세 REDUCER 63.5*38.1 (삼성밴드288) · 1건</option><option value="삼성밴드323">Matt Finish 산세뽕 TEE 50.8*25.4 (삼성밴드323) · 1건</option><option value="삼성밴드454">Matt Finish 산처리 구조관 PIPE [127*2.0T*6M] (삼성밴드454) · 3건</option><option value="삼성밴드457">Matt Finish 산처리 구조관 PIPE 152.4*2.0T*6M (삼성밴드457) · 1건</option></optgroup><optgroup label="유에스지 · 3종"><option value="유에스지23">MIDDLE FOR LINE PIPE 날개 PVC CAP 40 타공 캡 (유에스지23) · 1건</option><option value="유에스지2">MIDDLE FORE LINE SET (내화충전재) NW125(220) (유에스지2) · 1건</option><option value="유에스지5">MIDDLE FORE LINE SET (내화충전재) NW160(270) (유에스지5) · 1건</option></optgroup><optgroup label="유진이노텍 · 1종"><option value="유진이노텍1">DUAL BELLOWS(TI) NW40*150L (유진이노텍1) · 1건</option></optgroup><optgroup label="지에스티산업 · 1종"><option value="지에스티산업5">KF-BELLOWS NW50*200L (지에스티산업5) · 1건</option></optgroup><optgroup label="플러스알테크 · 1종"><option value="플러스알테크2">AL DOUBLE CLAMP 55MM (플러스알테크2) · 1건</option></optgroup></select>
+    <select id="makerSel" title="제조업체 선택"><option value="all">전체 업체</option></select>
     <label class="chk-only"><input type="checkbox" id="onlyPend">미입고만</label>
     <input type="search" id="q" placeholder="제조업체 · 품목 검색">
     <button class="btn pri" id="btnShare">공유</button>
@@ -273,7 +287,8 @@ body.viewer .qin{pointer-events:none;border-color:transparent;background:transpa
   <footer>
     체크박스를 누르면 발주수량 전량이 입고 처리됩니다. 일부만 들어왔으면 입고수량을 직접 고치면 부분입고로 바뀝니다.<br>
     오른쪽 <b>···</b> 버튼에서 발주수량을 정정하거나 발주를 취소할 수 있습니다. 취소된 발주는 집계와 진행률에서 빠집니다.<br>
-    한 신청일의 발주가 전량 입고되면 그 신청분은 목록에서 내려가 <b>보관함</b>으로 정리됩니다. 보관함에서 되돌리거나 완전히 지울 수 있습니다.
+    한 신청분(현장·신청일)의 발주가 전량 입고되면 업체 아래에 <b>보관함으로 옮기기</b> 버튼이 나타납니다. 직접 확인하고 눌러야 <b>보관함</b>으로 내려갑니다. 보관함에서 되돌리거나 완전히 지울 수 있습니다.<br>
+    (보관함 창의 “전량 입고되면 자동으로 정리하기”를 켜면 예전처럼 자동으로도 정리됩니다.)
   </footer>
 </div>
 
@@ -300,8 +315,8 @@ let ROWS = [];
 let STATE = {};
 let ARCH = {};
 let noAuto = {};
-let autoArch = true;
-let filter = {site:'all', date:'all', item:'all', q:'', pend:false};
+let autoArch = false;
+let filter = {site:'all', date:'all', item:'all', maker:'all', q:'', pend:false};
 let closed = {}, openEdit = null, saving = false, lastSync = null;
 let isAdmin = false, currentUser = null, cloudLoaded = false;
 
@@ -441,6 +456,7 @@ function visible(){
     if(filter.site!=='all' && r.site!==filter.site) return false;
     if(filter.date!=='all' && r.date!==filter.date) return false;
     if(filter.item!=='all' && ikey(r)!==filter.item) return false;
+    if(filter.maker!=='all' && (r.maker||'미지정')!==filter.maker) return false;
     if(filter.pend && (st==='done' || st==='cancel')) return false;
     if(q && !((r.maker+' '+r.spec+' '+(r.code||'')).toLowerCase().includes(q))) return false;
     return true;
@@ -498,8 +514,62 @@ function fillItems(){
   sel.value = filter.item;
 }
 
+/* 제조업체 목록 — 현재 현장·신청일 조건 안에서, 미입고 건수 함께 표시 */
+function fillMakers(){
+  const pool = activeRows().filter(r=>
+    (filter.site==='all' || r.site===filter.site) &&
+    (filter.date==='all' || r.date===filter.date));
+  const g = {};
+  pool.forEach(r=>{ const m = r.maker||'미지정'; (g[m]=g[m]||[]).push(r); });
+  const makers = Object.keys(g).sort((a,b)=>a.localeCompare(b,'ko'));
+  const sel = $('#makerSel');
+  const cnt = m => g[m].filter(r=>{const s=statusOf(r);return s==='pend'||s==='part';}).length;
+  const sig = makers.map(m=>m+':'+g[m].length+':'+cnt(m)).join('|');
+  if(sel._sig !== sig){
+    sel._sig = sig;
+    if(filter.maker!=='all' && !g[filter.maker]) filter.maker = 'all';
+    sel.innerHTML = '<option value="all">전체 업체 · '+makers.length+'곳</option>'
+      + makers.map(m=>{ const rest=cnt(m);
+          return '<option value="'+esc(m)+'">'+esc(m)+' · '+g[m].length+'건'
+            +(rest?' (미입고 '+rest+')':' (완료)')+'</option>'; }).join('');
+  }
+  sel.value = filter.maker;
+}
+
+/* 이 업체 그룹 안에서 전량 입고됐지만 아직 보관 안 된 신청분에 '보관' 버튼 */
+function archBtnHTML(g){
+  const batches = {};
+  g.forEach(r=>{ if(!isArch(r)) (batches[bkey(r)]=batches[bkey(r)]||[]).push(r); });
+  const ready = Object.keys(batches).filter(k=>{
+    if(noAuto[k]) { /* 자동정리 제외지만 수동 보관은 허용 */ }
+    const live = batches[k].filter(r=>statusOf(r)!=='cancel');
+    return live.length ? live.every(r=>statusOf(r)==='done') : false;
+  });
+  if(!ready.length) return '';
+  return ready.sort().map(k=>{
+    const p = k.split('|'); // site|date
+    const n = batches[k].length;
+    return '<div class="archbar" data-arch-batch="'+esc(k)+'">'
+      + '<span class="msg">📦 <b>'+esc(p[1])+' · '+esc(p[0])+'</b> 신청분 '+n+'건 전량 입고 완료</span>'
+      + (isAdmin ? '<button class="btn go" data-mvarch="'+esc(k)+'">보관함으로 옮기기</button>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function manualArch(k){
+  if(!isAdmin){ toast('읽기 전용입니다'); return; }
+  const rows = ROWS.filter(r=>bkey(r)===k && !isArch(r));
+  if(!rows.length) return;
+  const p = k.split('|');
+  if(!confirm(p[1]+' · '+p[0]+' 신청분 '+rows.length+'건을 보관함으로 옮깁니다.\n(기록은 그대로 남고, 보관함에서 언제든 되돌릴 수 있습니다)\n계속할까요?')) return;
+  ARCH[k] = {at: today(), n: rows.length};
+  delete noAuto[k];
+  save(); render();
+  toast(p[1]+' '+p[0]+' 신청분을 보관함으로 옮겼습니다');
+}
+
 function render(){
-  fillDates(); fillItems(); syncBar(); itemSummary();
+  fillDates(); fillMakers(); fillItems(); syncBar(); itemSummary();
   const rows = visible();
   const groups = {};
   rows.forEach(r=>{ (groups[r.maker] = groups[r.maker] || []).push(r); });
@@ -514,13 +584,20 @@ function render(){
         || (a.date<b.date?-1:a.date>b.date?1:0) || (a.site<b.site?-1:a.site>b.site?1:0));
       const live = g.filter(r=>statusOf(r)!=='cancel');
       const done = live.filter(r=>statusOf(r)==='done').length;
+      const part = live.filter(r=>statusOf(r)==='part').length;
+      const pend = live.filter(r=>statusOf(r)==='pend').length;
       const pct = live.length ? Math.round(done/live.length*100) : 100;
+      const chips = '<span class="gchip done">입고 '+done+'</span>'
+        + (part?'<span class="gchip part">부분 '+part+'</span>':'')
+        + '<span class="gchip pend'+(pend?'':' zero')+'">미입고 '+pend+'</span>';
       return '<section class="group '+(closed[name]?'closed':'')+'" data-g="'+esc(name)+'">'
         + '<div class="ghd" role="button" tabindex="0" aria-expanded="'+(!closed[name])+'">'
         + '<span class="caret">▼</span>'
         + '<span class="gname">'+esc(name)+'<em>'+g.length+'건</em></span>'
+        + '<span class="gchips">'+chips+'</span>'
         + '<span class="gmini"><i style="width:'+pct+'%"></i></span>'
         + '<span class="gstat">'+done+'/'+live.length+'</span></div>'
+        + archBtnHTML(g)
         + '<div class="rows">'+g.map(rowHTML).join('')+'</div></section>';
     }).join('');
   }
@@ -615,6 +692,9 @@ function updateCounts(){
 
 /* ---------- 이벤트 ---------- */
 $('#list').addEventListener('click', e=>{
+  const mv = e.target.closest('[data-mvarch]');
+  if(mv){ e.stopPropagation(); manualArch(mv.getAttribute('data-mvarch')); return; }
+  if(e.target.closest('.archbar')) return;
   const act = e.target.closest('[data-act]');
   const row = e.target.closest('.row');
   const a = act && act.dataset.act;
@@ -677,6 +757,7 @@ $('#segSite').addEventListener('click', e=>{
 });
 $('#dateSel').addEventListener('change', e=>{ filter.date = e.target.value; render(); });
 $('#itemSel').addEventListener('change', e=>{ filter.item = e.target.value; render(); });
+$('#makerSel').addEventListener('change', e=>{ filter.maker = e.target.value; render(); });
 $('#onlyPend').addEventListener('change', e=>{ filter.pend = e.target.checked; render(); });
 $('#q').addEventListener('input', e=>{ filter.q = e.target.value; render(); });
 
